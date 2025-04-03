@@ -87,6 +87,34 @@ export class LLSoftware implements LL {
 
 }
 
+/* for native if needed
+protected transformToViewSpace() {
+  if (NATIVE_TRANSFORM) {
+    const transform = true;
+
+    if (transform) {
+      this.ctx.setTransform(
+        this.zoom,
+        0,
+        0,
+        this.zoom,
+        this.center.x,
+        this.center.y
+      );
+    }
+
+    this.ctx.transform(
+      this.worldSpaceMatrix.matrix[0],
+      this.worldSpaceMatrix.matrix[1],
+      this.worldSpaceMatrix.matrix[3],
+      this.worldSpaceMatrix.matrix[4],
+      this.worldSpaceMatrix.matrix[6],
+      this.worldSpaceMatrix.matrix[7]
+    );
+  }
+}
+*/
+
 export class Batch {
   private color: string;
   constructor(private readonly ll: LL, color: string, private lineWidth = 1) {

@@ -1,13 +1,12 @@
-import { resetPerfCounters } from '../../components/Perf/model';
-import { CanvasRenderer } from '../render/CanvasRenderer';
-import { MPElement } from '../render/MPElement';
+import { resetPerfCounters } from "../../components/Perf/model";
+import { CanvasRenderer } from "../render/CanvasRenderer";
+import { MPElement } from "../render/MPElement";
 
 export class MicroPlotterEngine {
   public renderer: CanvasRenderer;
   public running = false;
   public lastUpdate = Date.now();
   public children: MPElement[] = [];
-
 
   constructor() {
     this.renderer = new CanvasRenderer(this);
@@ -27,17 +26,17 @@ export class MicroPlotterEngine {
     return this.renderer.getHTML();
   }
 
-  private updateScheduled: false | 'quick' | 'full' = false;
+  private updateScheduled: false | "quick" | "full" = false;
 
   public requestQuickUpdate() {
-    this.requestUpdate('quick');
+    this.requestUpdate("quick");
   }
 
-  public requestUpdate(type: 'quick' | 'full' = 'full') {
+  public requestUpdate(type: "quick" | "full" = "full") {
     if (this.updateScheduled) {
       // promote to full if requested
-      if (type === 'full') {
-        this.updateScheduled = 'full';
+      if (type === "full") {
+        this.updateScheduled = "full";
       }
       return;
     }
@@ -55,7 +54,7 @@ export class MicroPlotterEngine {
       this.update();
       this.renderCycle();
     });
-  }
+  };
 
   public run() {
     if (this.running) {
@@ -75,23 +74,13 @@ export class MicroPlotterEngine {
     const dt = now - this.lastUpdate;
     this.lastUpdate = now;
     // fix "quick update"
-    if (this.updateScheduled === 'full' || true) {
-      resetPerfCounters();
-      this.render(dt);
-    } else {
-      console.log('rendering quick');
-      this.renderQuick(dt);
-    }
+    resetPerfCounters();
+    this.render(dt);
   };
 
   private render(dt: number) {
     this.renderer.prepare();
-    this.renderer.prepareQuick();
     this.children.forEach((child) => child.render(this.renderer));
     this.renderer.postRender(dt);
-    this.renderer.postQuick(dt);
-  }
-
-  private renderQuick(dt: number) {
   }
 }

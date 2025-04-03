@@ -96,7 +96,8 @@ export class Grid extends MPElement {
     const gridY = getAdaptiveGrid(v.bottomLeft.y, v.topRight.y, 6)
     // const gridY = getMeterGrid(v.bottomLeft.y, v.topRight.y, 6)
 
-    const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(gridX.zoomFactor * 3));
+    // const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(gridX.zoomFactor * 3));
+    const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(1));
 
     const x0 = v.bottomLeft.x;
     const y0 = v.bottomLeft.y;

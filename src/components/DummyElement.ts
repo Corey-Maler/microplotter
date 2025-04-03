@@ -5,7 +5,7 @@ import { MPElement } from "@/MicroPlotter/render/MPElement";
 export class DummyElement extends MPElement {
   render(renderer: CanvasRenderer) {
 
-    const { path, stroke } = renderer.quickBatch('green');
+    const { path, stroke } = renderer.batch('green');
 
     path([
       new V2(0.11, 0.11),

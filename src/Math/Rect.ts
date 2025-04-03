@@ -4,8 +4,8 @@ export class Rect2D {
   public static identity() {
     return new Rect2D(new V2(0, 0), new V2(1, 1));
   }
-  public readonly v1: V2;
-  public readonly v2: V2;
+  public v1: V2;
+  public v2: V2;
   public get bottomLeft() {
     return this.v1;
   }
@@ -19,7 +19,7 @@ export class Rect2D {
 
   public get height() {
     return this.v2.y - this.v1.y;
-  } 
+  }
 
   public get center(): V2 {
     return this.v1.add(this.v2).mul(0.5);
@@ -83,7 +83,7 @@ export class Rect2D {
    * 0 - bottom left
    * 1 - bottom right
    * 2 - top right
-   * 3 - top left 
+   * 3 - top left
    */
   public quadrant(n: number) {
     const half = this.v1.add(this.v2).mul(0.5);
