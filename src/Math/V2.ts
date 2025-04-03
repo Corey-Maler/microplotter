@@ -40,6 +40,10 @@ export class V2 {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  public withinDistance(v2: V2, distance: number) {
+    return this.distanceTo(v2) <= distance;
+  }
+
   public static average(v1: V2, v2: V2) {
     return new V2((v1.x + v2.x) / 2, (v1.y + v2.y) / 2);
   }

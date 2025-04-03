@@ -12,6 +12,11 @@ export class MicroPlotterEngine {
     this.renderer = new CanvasRenderer(this);
   }
 
+  public activateEditMode = (props: any) => {
+    return this.renderer.mouseHandlers.activateEditMode(props);
+  }
+
+
   public add(element: MPElement) {
     element.setup(this);
     this.children.push(element);

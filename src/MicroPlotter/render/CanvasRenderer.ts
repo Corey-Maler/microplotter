@@ -7,13 +7,11 @@ import { MouseEventHandlers } from "./MouseEventHandlers";
 import { PanningTracker } from "./PanningTracker";
 import { ViewPort } from "./ViewPort";
 
-
 export class CanvasRenderer {
   protected rootDiv = document.createElement("div");
   public readonly ll: LL;
   // without transform, so 10 - is 10 pixels
   public readonly llScreenSpace: LL;
-
 
   public canvas: HTMLCanvasElement;
   private webGlCanvas: HTMLCanvasElement;
@@ -34,8 +32,6 @@ export class CanvasRenderer {
     return this.mouseHandlers.$mousePositionWorld;
   }
 
-  public worldSpaceMatrix = new M3();
-
   private updated = true;
 
   private _webGlLL?: WebGLBatchLL;
@@ -53,7 +49,7 @@ export class CanvasRenderer {
   }
 
   public get viewPortRatio() {
-    return this.viewPortTracker.viewPortRatio
+    return this.viewPortTracker.viewPortRatio;
   }
 
   public get viewPort() {
@@ -62,7 +58,7 @@ export class CanvasRenderer {
 
   private panningTracker: PanningTracker;
   private viewPortTracker: ViewPort;
-
+  public mouseHandlers: MouseEventHandlers;
 
   public worldToScreen(p: V2) {
     return this.viewMatrix.multiplyV2(p);
@@ -119,8 +115,6 @@ export class CanvasRenderer {
     resizeObserver.observe(this.rootDiv);
   }
 
-  private mouseHandlers: MouseEventHandlers;
-
   constructor(private readonly simpleEngine: { requestUpdate: () => void }) {
     const canvas = document.createElement("canvas");
     const webGlCanvas = document.createElement("canvas");
@@ -131,15 +125,17 @@ export class CanvasRenderer {
     this.rootDiv.appendChild(webGlCanvas);
 
     this.setupStyles();
-
+    const requestUpdate = () => this.simpleEngine.requestUpdate();
     this.viewPortTracker = new ViewPort(this.canvas.width, this.canvas.height);
-    this.panningTracker = new PanningTracker(this.viewPortTracker, () => {
-      this.simpleEngine.requestUpdate();
-    });
+    this.panningTracker = new PanningTracker(
+      this.viewPortTracker,
+      requestUpdate,
+    );
     this.mouseHandlers = new MouseEventHandlers(
       this.canvas,
       this.panningTracker,
       this.viewPortTracker,
+      requestUpdate,
     );
 
     const ctx = canvas.getContext("2d")!;
@@ -155,7 +151,7 @@ export class CanvasRenderer {
   }
 
   public onCanvasResize = (x: number, y: number) => {
-    this.viewPortTracker.update(x, y)
+    this.viewPortTracker.update(x, y);
     const ratio = this.viewPortTracker.HDPI;
     this.canvas.width = x * ratio;
     this.canvas.height = y * ratio;
@@ -171,8 +167,8 @@ export class CanvasRenderer {
     this.webGlCanvas.style.width = x + "px";
     this.webGlCanvas.style.height = y + "px";
 
-    this.panningTracker.updateWorldSpaceMatrix()
-    this.panningTracker.recalculate()
+    this.panningTracker.updateWorldSpaceMatrix();
+    this.panningTracker.recalculate();
   };
 
   protected clearBackground() {
