@@ -205,6 +205,24 @@ export class CanvasRenderer {
     renderText("FPS: " + Math.round(1 / (dt / 1000)), new V2(10, 20));
   }
 
+  public measureText(text: string) {
+    const measurements = this.ctx.measureText(text);
+
+    const height =
+      measurements.actualBoundingBoxAscent +
+      measurements.actualBoundingBoxDescent;
+    return new V2(
+      measurements.width / this.viewPortTracker.width,
+      height / this.viewPortTracker.height,
+    );
+    // return this.panningTracker.screenToWorld(
+    //   new V2(
+    //     measurements.width,
+    //     height
+    //   )
+    // )
+  }
+
   public batch(initialColor: string, lineWidth = 1) {
     return new Batch(this.ll, initialColor, lineWidth);
   }

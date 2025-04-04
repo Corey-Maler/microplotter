@@ -78,14 +78,14 @@ export class MicroPlotterEngine {
     const now = Date.now();
     const dt = now - this.lastUpdate;
     this.lastUpdate = now;
-    // fix "quick update"
+    this.children.forEach((child) => child.doUpdate(dt));
     resetPerfCounters();
     this.render(dt);
   };
 
   private render(dt: number) {
     this.renderer.prepare();
-    this.children.forEach((child) => child.render(this.renderer));
+    this.children.forEach((child) => child.doRender(this.renderer));
     this.renderer.postRender(dt);
   }
 }

@@ -2,9 +2,11 @@ import { MicroPlotter, MicroPlotterEngine } from "@/MicroPlotter";
 import { Grid } from "@/MicroPlotter/StandardElements/Grid";
 import { useCallback } from "react";
 import { DummyElement } from "./DummyElement";
-import { MyNode } from "./MyNode";
+// import { MyNode } from "./MyNode";
 import { MyText } from "./MyText";
 import { Rect2D, V2 } from "@/Math";
+import { MPLine } from "@/MicroPlotter/StandardElements/MpLine";
+import { MPText } from "@/MicroPlotter/StandardElements/MpText";
 
 export const DraftingTable = () => {
   const onSetup = useCallback((engine: MicroPlotterEngine) => {
@@ -12,13 +14,16 @@ export const DraftingTable = () => {
 
     engine.add(new Grid());
 
-    let tempNode: MyNode | null = new MyNode(
-      new Rect2D(new V2(0, 0), new V2(0.2, 0.2)),
-    );
+    let tempNode: MPLine | null = null;
 
-    engine.add(tempNode);
+    // engine.add(tempNode);
+
+    const text = new MPText("Hello world", new V2(0.5, 0.8))
+    engine.add(text);
 
     engine.add(new MyText(new V2(0.5, 0.5)));
+
+    engine.add(new MPLine(new V2(0.4, 0.1), new V2(0.9, 0.9)));
 
     // engine.renderer.$mousePosition.subscribe((position) => {
     //   tempNode.position = position;
@@ -27,31 +32,32 @@ export const DraftingTable = () => {
 
     tempNode = null;
     const cancelEditMode = engine.activateEditMode({
-      mode: "auto",
+      mode: "clicks",
       autorerender: true,
       onStart(point: V2) {
-        console.log("onStart", point);
-        tempNode = new MyNode(new Rect2D(point, point.add(new V2(0.1, 0.1))));
+        tempNode = new MPLine(point, point, { showMiddlePoint: true });
+        tempNode.showLenght = true;
         engine.add(tempNode);
       },
       onMove(point: V2) {
-        console.log("onMove", point);
         if (tempNode) {
-          tempNode.rect.v2 = point;
+          tempNode.p2 = point;
         }
       },
       onClick(point: V2) {
-        console.log("onClick", point);
         if (tempNode) {
-          tempNode.rect.v2 = point;
-          cancelEditMode();
-          tempNode = null;
+          tempNode.p2 = point;
+          tempNode.showLenght = false;
+          // cancelEditMode();
+          // tempNode = null;
+          tempNode = new MPLine(point, point, { showMiddlePoint: true });
+          tempNode.showLenght = true;
+          engine.add(tempNode);
         }
       },
       onEnd(point: V2) {
-        console.log("onEnd", point);
         if (tempNode) {
-          tempNode.rect.v2 = point;
+          // tempNode.rect.v2 = point;
           cancelEditMode();
           tempNode = null;
         }

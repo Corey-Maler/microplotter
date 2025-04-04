@@ -186,8 +186,9 @@ export class Batch {
     this.ll.fillText(text, p, this.color, size);
   }
 
-  point(p: V2) {
+  point = (p: V2) => {
     this.ll.arc(p, 5);
+    // this.ll.rect()
     return this;
   }
 }

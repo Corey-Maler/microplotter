@@ -55,7 +55,6 @@ export class MouseEventHandlers {
     mode: "auto" | "clicks" | "drag&drop";
     autorerender?: boolean;
   }) => {
-    console.log("activate edit mode");
     this.dragging = false; // not sure, but probably should be this
     this.editMode = true;
     const subscriptions = [] as (() => void)[];
@@ -94,13 +93,15 @@ export class MouseEventHandlers {
 
 
         if (onMove) {
-          this.$mousePositionWorld.subscribe(onMove);
+          const moveUnsubscribe = this.$mousePositionWorld.subscribe(onMove);
+          subscriptions.push(moveUnsubscribe);
         }
 
         if (onEnd) {
-          this.$mouseUpScreen.subscribe((point) => {
+          const mouseUpUnsubscribe = this.$mouseUpScreen.subscribe((point) => {
             onEnd(this.panningTracker.screenToWorld(point));
           });
+          subscriptions.push(mouseUpUnsubscribe);
         }
       });
 

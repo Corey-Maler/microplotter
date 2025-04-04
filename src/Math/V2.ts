@@ -18,6 +18,10 @@ export class V2 {
     return new V2(this.x * s, this.y * s);
   }
 
+  public get half() {
+    return new V2(this.x / 2, this.y / 2);
+  }
+
   public byElementDiv(v: V2) {
     return new V2(this.x / v.x, this.y / v.y);
   }
@@ -85,7 +89,9 @@ export class V2 {
   }
 
   public closeEnough(p2: V2, epsilon = 1e-20) {
-    return Math.abs(this.x - p2.x) < epsilon && Math.abs(this.y - p2.y) < epsilon;
+    return (
+      Math.abs(this.x - p2.x) < epsilon && Math.abs(this.y - p2.y) < epsilon
+    );
   }
 
   public maxFrom(p2: V2) {
@@ -102,6 +108,25 @@ export class V2 {
     return `V2(${this.x}, ${this.y})`;
   }
 
+  public get angle() {
+    return Math.atan2(this.y, this.x);
+  }
+
+  public setAngle(angle: number) {
+    const length = this.length();
+    return new V2(Math.cos(angle) * length, Math.sin(angle) * length);
+  }
+
+  public setLenght(length: number) {
+    const angle = this.angle;
+    return new V2(Math.cos(angle) * length, Math.sin(angle) * length);
+  }
+
+  // should subtract from this vector given amount
+  public shortenBy(amount: number) {
+    return this.setLenght(this.length() - amount);
+  }
+
   toJson() {
     return { x: this.x, y: this.y };
   }
@@ -110,5 +135,4 @@ export class V2 {
   static fromJson(json: any) {
     return new V2(json.x, json.y);
   }
-
 }
