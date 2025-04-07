@@ -5,21 +5,29 @@ import { Colors } from "../../render/colors";
 import { getAdaptiveGrid } from "./getAdaptiveGrid";
 
 export class Grid extends MPElement {
-  /*
-  constructor(private renderer: CanvasRenderer) {
+  /**
+   * Controls the density of the grid:
+   * - 0: Standard grid density (default)
+   * - 1: Higher level of detail with finer grid lines
+   */
+  public density: number = 0;
 
+  constructor(density: number = 0) {
+    super();
+    this.density = density;
   }
-  */
 
   public render(renderer: CanvasRenderer) {
     const v = renderer.visibleArea;
 
     // Use the refactored getAdaptiveGrid function to generate synchronized grid lines
+    // Pass the density parameter for grid detail control
     const gridResult = getAdaptiveGrid(
       v.bottomLeft.x, 
       v.topRight.x, 
       v.bottomLeft.y, 
-      v.topRight.y
+      v.topRight.y,
+      this.density
     );
     
     // Extract grid lines and opacity

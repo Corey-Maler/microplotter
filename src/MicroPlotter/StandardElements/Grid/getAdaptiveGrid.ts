@@ -5,9 +5,16 @@
  * @param toX - The ending X value
  * @param fromY - The starting Y value
  * @param toY - The ending Y value
+ * @param density - Controls grid density: 0 for standard, 1 for higher detail (default: 0)
  * @returns Object containing grid and subgrid lines with their opacity values for both axes
  */
-export function getAdaptiveGrid(fromX: number, toX: number, fromY: number, toY: number): {
+export function getAdaptiveGrid(
+  fromX: number, 
+  toX: number, 
+  fromY: number, 
+  toY: number, 
+  density: number = 0
+): {
   x: { grid: number[]; subgrid: number[] };
   y: { grid: number[]; subgrid: number[] };
   subgridOpacity: number;
@@ -21,7 +28,9 @@ export function getAdaptiveGrid(fromX: number, toX: number, fromY: number, toY: 
   const minRange = Math.min(rangeX, rangeY);
   
   // Use the same magnitude for both axes to ensure synchronization
-  const magnitude = Math.floor(Math.log10(minRange));
+  // Apply density offset to show more detailed grid when density is higher
+  const magnitudeOffset = density > 0 ? 1 : 0;
+  const magnitude = Math.floor(Math.log10(minRange)) - magnitudeOffset;
   const majorStep = Math.pow(10, magnitude);
   const minorStep = majorStep / 10;
   
@@ -32,7 +41,8 @@ export function getAdaptiveGrid(fromX: number, toX: number, fromY: number, toY: 
   
   // Calculate the opacity based on zoom level (same for both axes)
   const magnitude_exact = Math.log10(minRange);
-  const zoomProgress = 1 - (magnitude_exact - magnitude);
+  // Adjust zoom progress calculation to account for density offset
+  const zoomProgress = 1 - ((magnitude_exact - magnitude) - magnitudeOffset);
   const subgridOpacity = Math.max(0, Math.min(1, zoomProgress));
   
   // Generate grid lines for X axis

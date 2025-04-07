@@ -12,7 +12,8 @@ export const DraftingTable = () => {
   const onSetup = useCallback((engine: MicroPlotterEngine) => {
     engine.add(new DummyElement());
 
-    engine.add(new Grid());
+    // Create a grid with higher density (more detailed grid lines)
+    engine.add(new Grid(1));
 
     let tempNode: MPLine | null = null;
 
