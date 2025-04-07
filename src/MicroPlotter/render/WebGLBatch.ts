@@ -1,6 +1,7 @@
-import { V2, M3 } from "@/Math";
+import { V2, M3, Rect2D } from "@/Math";
 import { LL } from "./Batch";
 import { ColorCache } from "./ColorCache";
+import { GridShader } from "./GridShader";
 
 const vertexShaderSource = `#version 300 es
 
@@ -85,6 +86,9 @@ export class WebGLBatchLL implements LL {
   private lineWidthLocation: WebGLUniformLocation | null;
   private viewMatrix: M3 = new M3();
   private colorCache: ColorCache;
+  
+  // Grid shader instance
+  private gridShader: GridShader;
 
   public prepareRender() {
     const gl = this.gl;
@@ -176,6 +180,9 @@ export class WebGLBatchLL implements LL {
     gl.bindVertexArray(vao);
 
     this.colorCache = ColorCache.getInstance();
+
+    // Initialize the grid shader
+    this.gridShader = new GridShader(gl);
   }
 
   p3(points: Float32Array, offsets: number[], sizes: number[], colors: string[], lineWidth: number = 1) {
@@ -318,5 +325,42 @@ export class WebGLBatchLL implements LL {
 
   set strokeStyle(color: string) {
     // TODO: Implement strokeStyle
+  }
+
+  /**
+   * Renders grid dots directly using a dedicated shader
+   * 
+   * @param viewArea - The visible area in world coordinates
+   * @param density - Grid density factor
+   * @param gridColor - Color for major grid points
+   * @param subgridColor - Color for minor grid points with opacity
+   * @param dotSize - Size of dots in pixels
+   */
+  public renderGridDots(
+    viewArea: Rect2D,
+    density: number = 0, 
+    gridColor: string = '#dddddd',
+    subgridOpacity: number = 0.5,
+    dotSize: number = 2
+  ) {
+    // Calculate adjusted opacity for subgrid
+    // Map original opacity range [0, 0.5] to 0
+    // Map original opacity range [0.5, 1] to [0, 1] linearly
+    const adjustedOpacity = subgridOpacity <= 0.5 ? 0 : (subgridOpacity - 0.5) * 2;
+    
+    // Skip rendering subgrid if opacity is too low
+    const subgridColor = adjustedOpacity < 0.1 
+      ? 'rgba(221, 221, 221, 0)' // Fully transparent
+      : `rgba(221, 221, 221, ${adjustedOpacity})`;
+    
+    // Use the grid shader to render dots
+    this.gridShader.render(
+      viewArea,
+      0, // Let the shader calculate the grid size
+      density,
+      gridColor,
+      subgridColor,
+      dotSize
+    );
   }
 }

@@ -34,8 +34,6 @@ export class Grid extends MPElement {
   public render(renderer: CanvasRenderer) {
     const v = renderer.visibleArea;
 
-    renderer.webGL
-
     // Use the refactored getAdaptiveGrid function to generate synchronized grid lines
     // Pass the density parameter for grid detail control
     const gridResult = getAdaptiveGrid(
@@ -54,7 +52,14 @@ export class Grid extends MPElement {
     if (this.mode === GridMode.LINES) {
       this.renderLines(renderer, gridX, gridY, subgridOpacity);
     } else {
-      this.renderDots(renderer, gridX, gridY, subgridOpacity);
+      // Use the GPU-based shader rendering for dots
+      renderer.webGL.renderGridDots(
+        v,
+        this.density,
+        '#dddddd', // Grid primary color
+        subgridOpacity,
+        2 // Dot size
+      );
     }
   }
 
@@ -95,122 +100,6 @@ export class Grid extends MPElement {
     }
 
     stroke();
-  }
-
-  private renderDots(
-    renderer: CanvasRenderer, 
-    gridX: { grid: number[]; subgrid: number[] }, 
-    gridY: { grid: number[]; subgrid: number[] }, 
-    subgridOpacity: number
-  ) {
-    // Adjust opacity mapping: 
-    // Map original opacity range [0, 0.5] to 0
-    // Map original opacity range [0.5, 1] to [0, 1] linearly
-    const adjustedOpacity = subgridOpacity <= 0.5 ? 0 : (subgridOpacity - 0.5) * 2;
-    
-    // Skip rendering subgrid if opacity is too low
-    if (adjustedOpacity < 0.1) {
-      // Only render major grid points
-      const majorPoints: number[] = [];
-      for (const x of gridX.grid) {
-        for (const y of gridY.grid) {
-          majorPoints.push(x, y);
-        }
-      }
-      
-      // Use consistent 2-pixel size for all dots
-      const dotSize = 2;
-      const majorColor = '#c9c9ca'; // Grid primary color
-      
-      // Render all major points with the grid color
-      if (majorPoints.length > 0) {
-        renderer.webGL.renderPoints(
-          new Float32Array(majorPoints), 
-          majorColor, 
-          dotSize
-        );
-      }
-      
-      return;
-    }
-    
-    // Continue with normal rendering since opacity is sufficient
-    const webglLL = renderer.webGL;
-    
-    // Create a Set of major grid points for quick lookup
-    const majorPointsSet = new Set<string>();
-    
-    // Collect major grid intersection points as dots
-    const majorPoints: number[] = [];
-    for (const x of gridX.grid) {
-      for (const y of gridY.grid) {
-        // Create a unique key for this point
-        const key = `${x},${y}`;
-        majorPointsSet.add(key);
-        majorPoints.push(x, y);
-      }
-    }
-    
-    // Prepare arrays to hold the filtered subgrid point data
-    const minorPoints: number[] = [];
-    
-    // Collect minor grid intersection points as dots (subgrid x subgrid)
-    for (const x of gridX.subgrid) {
-      for (const y of gridY.subgrid) {
-        // Skip if this point is already in the major grid
-        const key = `${x},${y}`;
-        if (!majorPointsSet.has(key)) {
-          minorPoints.push(x, y);
-        }
-      }
-    }
-    
-    // Intersections of minor x with major y
-    for (const x of gridX.subgrid) {
-      for (const y of gridY.grid) {
-        // Skip if this point is already in the major grid
-        const key = `${x},${y}`;
-        if (!majorPointsSet.has(key)) {
-          minorPoints.push(x, y);
-        }
-      }
-    }
-    
-    // Intersections of major x with minor y
-    for (const x of gridX.grid) {
-      for (const y of gridY.subgrid) {
-        // Skip if this point is already in the major grid
-        const key = `${x},${y}`;
-        if (!majorPointsSet.has(key)) {
-          minorPoints.push(x, y);
-        }
-      }
-    }
-    
-    // Use consistent 2-pixel size for all dots
-    const dotSize = 2;
-    
-    // Use rgba format explicitly to ensure proper handling of opacity
-    const minorColor = `rgba(221, 221, 221, ${adjustedOpacity})`;
-    const majorColor = '#dddddd'; // Grid primary color
-    
-    // Render all minor points with the subgrid color
-    if (minorPoints.length > 0) {
-      webglLL.renderPoints(
-        new Float32Array(minorPoints), 
-        minorColor, 
-        dotSize
-      );
-    }
-    
-    // Render all major points with the grid color (after minors to ensure they're on top)
-    if (majorPoints.length > 0) {
-      webglLL.renderPoints(
-        new Float32Array(majorPoints), 
-        majorColor, 
-        dotSize
-      );
-    }
   }
 }
 
