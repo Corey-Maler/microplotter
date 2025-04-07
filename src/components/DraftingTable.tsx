@@ -1,5 +1,5 @@
 import { MicroPlotter, MicroPlotterEngine } from "@/MicroPlotter";
-import { Grid } from "@/MicroPlotter/StandardElements/Grid";
+import { Grid, GridMode } from "@/MicroPlotter/StandardElements/Grid";
 import { useCallback } from "react";
 import { DummyElement } from "./DummyElement";
 // import { MyNode } from "./MyNode";
@@ -13,7 +13,7 @@ export const DraftingTable = () => {
     engine.add(new DummyElement());
 
     // Create a grid with higher density (more detailed grid lines)
-    engine.add(new Grid(1));
+    engine.add(new Grid(1, GridMode.DOTS));
 
     let tempNode: MPLine | null = null;
 
