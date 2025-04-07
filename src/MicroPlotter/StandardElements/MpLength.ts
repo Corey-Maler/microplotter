@@ -7,15 +7,23 @@ import { MPLine } from "./MpLine";
 
 const MAGIC_PADDING = 0.01;
 
+const LENGHT_COLOR = '#666666';
+
 export class MPLenght extends MPElement {
   private _p1: V2;
   private _p2: V2;
+
+  private offsetVector: V2 = new V2(0, MAGIC_PADDING);
+
+  private get angle() {
+    return this._p2.sub(this._p1).angle;
+  }
 
   public set p1p2(value: [V2, V2]) {
     const p1 = value[0]
     const p2 = value[1]
     const diff = p2.sub(p1);
-    const pad = new V2(0, MAGIC_PADDING).setAngle(diff.angle + Math.PI / 2)
+    const pad = this.offsetVector.setAngle(diff.angle + Math.PI / 2)
 
     this._p1 = p1.add(pad);
     this._p2 = p2.add(pad);
@@ -57,6 +65,7 @@ export class MPLenght extends MPElement {
       this.appendChild(this.lenghtText);
 
       const lt = this.lenghtText;
+      lt.color = LENGHT_COLOR
 
       lt.constrain(
         'text',
@@ -64,11 +73,25 @@ export class MPLenght extends MPElement {
       )
 
       lt.constrain('center', () => this.middle);
+      lt.constrain('rotation', () => {
+        const PI = Math.PI;
+        const angle = this.angle;
+        if (angle > (PI / 2)) {
+          return angle - PI;
+        }
+        if (angle < (-PI / 2)) {
+          return angle + PI;
+        }
+        return angle;
+      });
   }
 
   private setupLeftAndRight() {
     const leftLine = new MPLine(this._p1, this.middle);
     const rightLine = new MPLine(this.middle, this._p2);
+
+    leftLine.color = LENGHT_COLOR;
+    rightLine.color = LENGHT_COLOR;
 
     this.leftLine = leftLine;
     this.rightLine = rightLine;

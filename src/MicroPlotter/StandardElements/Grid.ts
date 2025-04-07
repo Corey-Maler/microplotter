@@ -47,8 +47,69 @@ function getMeterGrid(min: number, max: number, targetLines = 10): { major: numb
 }
 /* */
 
+function getAdaptiveGrid(from: number, to: number): {
+    major: number[],
+    minor: number[],
+    subMinor: number[],
+    minorOpacity: number,
+    subMinorOpacity: number
+} {
+    const range = to - from;
+    const targetMajorLines = 5;
 
-function getAdaptiveGrid(min: number, max: number, targetLines = 8): { major: number[], minor: number[] } {
+    const base = Math.pow(10, Math.floor(Math.log10(range / targetMajorLines)));
+    const steps = [1, 2, 5].map(x => x * base);
+
+    let majorStep = steps[0];
+    for (const step of steps) {
+        if (range / step >= targetMajorLines) {
+            majorStep = step;
+        } else {
+            break;
+        }
+    }
+
+    const minorStep = majorStep / 5;
+    const subMinorStep = minorStep / 5;
+
+    const major: number[] = [];
+    const majorStart = Math.ceil(from / majorStep) * majorStep;
+    const majorEnd = Math.floor(to / majorStep) * majorStep;
+    for (let x = majorStart; x <= majorEnd + 1e-10; x += majorStep) {
+        major.push(Number(x.toFixed(12)));
+    }
+
+    const minor: number[] = [];
+    const minorStart = Math.ceil(from / minorStep) * minorStep;
+    const minorEnd = Math.floor(to / minorStep) * minorStep;
+    for (let x = minorStart; x <= minorEnd + 1e-10; x += minorStep) {
+        const val = Number(x.toFixed(12));
+        if (!major.includes(val)) {
+            minor.push(val);
+        }
+    }
+
+    const subMinor: number[] = [];
+    const subMinorStart = Math.ceil(from / subMinorStep) * subMinorStep;
+    const subMinorEnd = Math.floor(to / subMinorStep) * subMinorStep;
+    for (let x = subMinorStart; x <= subMinorEnd + 1e-10; x += subMinorStep) {
+        const val = Number(x.toFixed(12));
+        if (!major.includes(val) && !minor.includes(val)) {
+            subMinor.push(val);
+        }
+    }
+
+    // New fade logic: fade in minor between [majorStep * 10, majorStep * 2]
+    const fade = (start: number, end: number) =>
+        Math.min(1, Math.max(0, (start - range) / (start - end)));
+
+    const minorOpacity = fade(majorStep * 10, majorStep * 2); // fades in as you zoom in
+    const subMinorOpacity = fade(minorStep * 10, minorStep * 2); // same idea
+
+    return { major, minor, subMinor, minorOpacity, subMinorOpacity };
+}
+
+function getAdaptiveGrid2(min: number, max: number, targetLines = 8): { major: number[], minor: number[] } {
     const range = max - min;
     const baseStep = Math.pow(10, Math.floor(Math.log10(range / targetLines)));
 
@@ -91,13 +152,19 @@ export class Grid extends MPElement {
 
     const v = renderer.visibleArea;
 
-    const gridX = getAdaptiveGrid(v.bottomLeft.x, v.topRight.x, 6)
+    const gridX = getAdaptiveGrid(v.bottomLeft.x, v.topRight.x)
+    console.log({
+      from: v.bottomLeft.x,
+      to: v.topRight.x,
+    ...gridX
+    })
     // const gridX = getMeterGrid(v.bottomLeft.x, v.topRight.x, 6)
-    const gridY = getAdaptiveGrid(v.bottomLeft.y, v.topRight.y, 6)
+    const gridY = getAdaptiveGrid(v.bottomLeft.y, v.topRight.y)
     // const gridY = getMeterGrid(v.bottomLeft.y, v.topRight.y, 6)
 
-    // const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(gridX.zoomFactor * 3));
-    const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(1));
+    const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(gridX.minorOpacity));
+    console.log('zoom factor', gridX.minorOpacity, gridX.subMinorOpacity)
+    // const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(1));
 
     const x0 = v.bottomLeft.x;
     const y0 = v.bottomLeft.y;

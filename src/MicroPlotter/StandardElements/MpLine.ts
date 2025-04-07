@@ -8,6 +8,8 @@ export class MPLine extends MPElement {
   public p1: V2;
   public p2: V2;
 
+  public color: string = "#000000";
+
   private lenghtElement?: MPLenght;
 
   public get middle(): V2 {
@@ -41,7 +43,7 @@ export class MPLine extends MPElement {
   }
 
   render(renderer: CanvasRenderer): void {
-    const { line, stroke } = renderer.batch("red");
+    const { line, stroke } = renderer.batch(this.color);
     line(this.p1, this.p2);
     stroke();
   }

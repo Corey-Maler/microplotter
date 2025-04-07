@@ -6,6 +6,7 @@ import { WebGLBatchLL } from "./WebGLBatch";
 import { MouseEventHandlers } from "./MouseEventHandlers";
 import { PanningTracker } from "./PanningTracker";
 import { ViewPort } from "./ViewPort";
+import { MPElement } from "./MPElement";
 
 export class CanvasRenderer {
   protected rootDiv = document.createElement("div");
@@ -221,6 +222,25 @@ export class CanvasRenderer {
     //     height
     //   )
     // )
+  }
+
+  public prepareScreen(el: MPElement) {
+    if (el.rotation !== 0) {
+      // move to LLSoftware
+      const shift = this.viewMatrix.multiplyV2(el.origin);
+      this.ctx.save();
+      this.ctx.translate(shift.x, shift.y);
+      // note that we display in such way that y0 is at the bottom left
+      // that makes everything flipped, which requires us to flip rotation
+      this.ctx.rotate(-el.rotation);
+      this.ctx.translate(-shift.x, -shift.y);
+    }
+  }
+
+  public resetScreen(el: MPElement) {
+    if (el.rotation !== 0) {
+      this.ctx.restore();
+    }
   }
 
   public batch(initialColor: string, lineWidth = 1) {

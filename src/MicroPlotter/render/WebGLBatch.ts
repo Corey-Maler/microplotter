@@ -3,7 +3,7 @@ import { LL } from "./Batch";
 import { ColorCache } from "./ColorCache";
 
 const vertexShaderSource = `#version 300 es
- 
+
 // an attribute is an input (in) to a vertex shader.
 // It will receive data from a buffer
 in vec2 a_position;
@@ -13,7 +13,7 @@ uniform mat3 u_viewMatrix;
 
 // Add uniform for line width
 uniform float u_lineWidth;
- 
+
 // all shaders have a main function
 void main() {
   // Transform the position using the view matrix
@@ -25,17 +25,17 @@ void main() {
 `;
 
 const fragmentShaderSource = `#version 300 es
- 
+
 // fragment shaders don't have a default precision so we need
 // to pick one. highp is a good default. It means "high precision"
 precision highp float;
- 
+
 // Add uniform for color
 uniform vec4 u_color;
- 
+
 // we need to declare an output for the fragment shader
 out vec4 outColor;
- 
+
 void main() {
   outColor = u_color;
 }
@@ -44,7 +44,7 @@ void main() {
 function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
   const shader = gl.createShader(type);
   if (!shader) return null;
-  
+
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
@@ -60,7 +60,7 @@ function createShader(gl: WebGL2RenderingContext, type: number, source: string):
 function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
   const program = gl.createProgram();
   if (!program) return null;
-  
+
   gl.attachShader(program, vertexShader);
   gl.attachShader(program, fragmentShader);
   gl.linkProgram(program);
@@ -115,7 +115,7 @@ export class WebGLBatchLL implements LL {
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
-    
+
     if (!vertexShader || !fragmentShader) {
       throw new Error('Failed to create shaders');
     }
@@ -124,7 +124,7 @@ export class WebGLBatchLL implements LL {
     if (!program) {
       throw new Error('Failed to create program');
     }
-    
+
     this.program = program;
     this.positionAttributeLocation = gl.getAttribLocation(program, "a_position");
     this.viewMatrixLocation = gl.getUniformLocation(program, "u_viewMatrix");
@@ -136,14 +136,14 @@ export class WebGLBatchLL implements LL {
     if (!this.pointsBuffer) {
       throw new Error('Failed to create buffer');
     }
-    
+
     gl.bindBuffer(gl.ARRAY_BUFFER, this.pointsBuffer);
 
     const vao = gl.createVertexArray();
     if (!vao) {
       throw new Error('Failed to create VAO');
     }
-    
+
     this.vao = vao;
     gl.bindVertexArray(vao);
 
@@ -169,45 +169,15 @@ export class WebGLBatchLL implements LL {
     this.colorCache = ColorCache.getInstance();
   }
 
-  p(_points: number[]) {
-    const gl = this.gl;
-
-    // Bind the VAO
-    gl.bindVertexArray(this.vao);
-    
-    // Bind our points buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.pointsBuffer);
-    
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(_points), gl.DYNAMIC_DRAW);
-    
-    // Draw the points as a line strip
-    gl.drawArrays(gl.LINE_STRIP, 0, _points.length / 2);
-  }
-
-  p2(_points: Float32Array) {
-    const gl = this.gl;
-
-    // Bind the VAO
-    gl.bindVertexArray(this.vao);
-    
-    // Bind our points buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.pointsBuffer);
-    
-    gl.bufferData(gl.ARRAY_BUFFER, _points, gl.DYNAMIC_DRAW);
-    
-    // Draw the points as a line strip
-    gl.drawArrays(gl.LINE_STRIP, 0, _points.length / 2);
-  }
-
   p3(points: Float32Array, offsets: number[], sizes: number[], colors: string[], lineWidth: number = 1) {
     const gl = this.gl;
 
     // Bind the VAO
     gl.bindVertexArray(this.vao);
-    
+
     // Bind our points buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, this.pointsBuffer);
-    
+
     gl.bufferData(gl.ARRAY_BUFFER, points, gl.DYNAMIC_DRAW);
 
     // Get color from cache
@@ -228,7 +198,7 @@ export class WebGLBatchLL implements LL {
 
     // Bind the VAO
     gl.bindVertexArray(this.vao);
-    
+
     // Bind our points buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, this.pointsBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, points, gl.DYNAMIC_DRAW);

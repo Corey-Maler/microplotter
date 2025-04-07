@@ -7,6 +7,7 @@ export class MPText extends MPElement {
   public position: V2;
   public text: string;
   public boundary: MPRect;
+  public color: string = '#000000';
 
   public get size(): V2 {
     const textSize = this.engine?.renderer.measureText(this.text);
@@ -15,6 +16,9 @@ export class MPText extends MPElement {
 
   public set center(value: V2) {
     const textSize = this.engine?.renderer.measureText(this.text);
+
+    this.origin = value;
+    this.rotation = Math.PI / 2;
 
     if (textSize) {
       this.position = value.sub(textSize.half);
@@ -34,7 +38,7 @@ export class MPText extends MPElement {
   }
 
   render(renderer: CanvasRenderer): void {
-    const { renderText } = renderer.batch("red");
+    const { renderText } = renderer.batch(this.color);
     renderText(this.text, this.position);
     // stroke();
   }

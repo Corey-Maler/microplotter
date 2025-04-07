@@ -1,3 +1,4 @@
+import { V2 } from "@/Math";
 import { MicroPlotterEngine } from "../engine/engine";
 import { CanvasRenderer } from "./CanvasRenderer";
 
@@ -6,7 +7,9 @@ export interface Constraint {
   fn: () => any;
 }
 
-export class MPElement {
+export abstract class MPElement {
+  public rotation: number = 0;
+  public origin: V2 = new V2(0, 0);
   protected _engine?: MicroPlotterEngine;
   protected _parent?: MPElement;
   protected get engine(): MicroPlotterEngine | undefined {
@@ -70,7 +73,10 @@ export class MPElement {
     if (this.children) {
       this.children.forEach((child) => child.doRender(renderer));
     }
+
+    renderer.prepareScreen(this);
     this.render(renderer);
+    renderer.resetScreen(this);
   }
 
   render(renderer: CanvasRenderer) {

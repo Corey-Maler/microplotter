@@ -17,7 +17,8 @@ export class DummyElement extends MPElement {
     stroke();
 
 
-    renderer.webGL.p(
+    renderer.webGL.p3(
+      new Float32Array(
       [
         0.09, 0.09,
         0.09, 0.91,
@@ -27,15 +28,15 @@ export class DummyElement extends MPElement {
         0.91, 0.91,
         0.91, 0.09,
         0.09, 0.91
-      ]
+      ]), [0], [8], ['#666600']
     );
 
-    renderer.webGL.p([
+    renderer.webGL.p3(new Float32Array([
       0.09, 0.09,
       0.09, 0.21,
       0.21, 0.21,
       0.21, 0.09,
       0.09, 0.09,
-    ])
+    ]), [0], [5], ['#ff0000'])
   }
 }
