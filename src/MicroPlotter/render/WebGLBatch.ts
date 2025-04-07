@@ -88,6 +88,7 @@ export class WebGLBatchLL implements LL {
 
   public prepareRender() {
     const gl = this.gl;
+    // Clear with fully transparent background (r,g,b,alpha)
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -106,12 +107,20 @@ export class WebGLBatchLL implements LL {
   constructor(canvas: HTMLCanvasElement) {
     console.log('WebGLBatch.constructor');
 
-    const gl = canvas.getContext("webgl2");
+    const gl = canvas.getContext("webgl2", { 
+      premultipliedAlpha: false,
+      alpha: true 
+    });
     if (!gl) {
       // no webgl2 for you!
       throw new Error('NO WEBGL2')
     }
     this.gl = gl;
+
+    // Enable transparency with proper blending
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.blendEquation(gl.FUNC_ADD);
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
@@ -219,6 +228,51 @@ export class WebGLBatchLL implements LL {
     gl.deleteBuffer(elementBuffer);
   }
 
+  /**
+   * Implements the 'p' method required by the LL interface
+   */
+  public p(points: number[]): void {
+    // Convert the number array to Float32Array
+    const float32Points = new Float32Array(points);
+    
+    // Reuse the existing renderPoints method
+    const defaultColor = "black";
+    const defaultSize = 1;
+    this.renderPoints(float32Points, defaultColor, defaultSize);
+  }
+
+  /**
+   * Renders an array of points using WebGL's GL_POINTS primitive
+   * 
+   * @param points - Float32Array containing x,y pairs for each point
+   * @param color - Color to use for the points
+   * @param pointSize - Size of each point in pixels
+   */
+  public renderPoints(points: Float32Array, color: string, pointSize: number = 1) {
+    const gl = this.gl;
+    
+    // Ensure the blend function is properly set for transparency
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    // Bind the VAO
+    gl.bindVertexArray(this.vao);
+
+    // Bind our points buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pointsBuffer);
+
+    // Send the point data to WebGL
+    gl.bufferData(gl.ARRAY_BUFFER, points, gl.DYNAMIC_DRAW);
+
+    // Get color from cache
+    const parsedColor = this.colorCache.getColor(color);
+    gl.uniform4f(this.colorLocation, parsedColor[0], parsedColor[1], parsedColor[2], parsedColor[3]);
+    
+    // Set point size
+    gl.uniform1f(this.lineWidthLocation, pointSize);
+
+    // Draw the points
+    gl.drawArrays(gl.POINTS, 0, points.length / 2);
+  }
 
   resize(w: number, h: number) {
     this.gl.viewport(0, 0, w, h);

@@ -20,8 +20,11 @@ export class CanvasRenderer {
     return this.rootDiv;
   }
 
-  public get webGL() {
-    return this._webGlLL!;
+  public get webGL(): WebGLBatchLL {
+    if (!this._webGlLL) {
+      throw new Error("WebGL LL is not yet setup");
+    }
+    return this._webGlLL;
   }
 
   public ctx: CanvasRenderingContext2D;
@@ -98,7 +101,6 @@ export class CanvasRenderer {
     this.webGlCanvas.style.left = "0px";
     this.webGlCanvas.style.pointerEvents = "none";
     this.webGlCanvas.style.zIndex = "3";
-    this.webGlCanvas.style.opacity = "0.5";
 
     this.rootDiv.style.position = "relative";
     this.rootDiv.style.flex = "1";
@@ -119,6 +121,9 @@ export class CanvasRenderer {
   constructor(private readonly simpleEngine: { requestUpdate: () => void }) {
     const canvas = document.createElement("canvas");
     const webGlCanvas = document.createElement("canvas");
+    
+    // Set the WebGL canvas to have proper transparency
+    webGlCanvas.style.backgroundColor = "transparent";
 
     this.canvas = canvas;
     this.webGlCanvas = webGlCanvas;

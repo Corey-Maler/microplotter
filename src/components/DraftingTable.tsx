@@ -14,6 +14,7 @@ export const DraftingTable = () => {
 
     // Create a grid with higher density (more detailed grid lines)
     engine.add(new Grid(1, GridMode.DOTS));
+    // engine.add(new Grid(1, GridMode.LINES));
 
     let tempNode: MPLine | null = null;
 
