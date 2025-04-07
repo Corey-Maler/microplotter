@@ -1,64 +1,84 @@
 /**
- * Generates adaptive grid and subgrid lines for a given range.
+ * Generates synchronized adaptive grid lines for both X and Y axes.
  * 
- * @param from - The starting value of the range
- * @param to - The ending value of the range
- * @returns Object containing grid and subgrid lines with their opacity values
+ * @param fromX - The starting X value
+ * @param toX - The ending X value
+ * @param fromY - The starting Y value
+ * @param toY - The ending Y value
+ * @returns Object containing grid and subgrid lines with their opacity values for both axes
  */
-export function getAdaptiveGrid(from: number, to: number): {
-  grid: number[];
-  subgrid: number[];
+export function getAdaptiveGrid(fromX: number, toX: number, fromY: number, toY: number): {
+  x: { grid: number[]; subgrid: number[] };
+  y: { grid: number[]; subgrid: number[] };
   subgridOpacity: number;
 } {
-  // Calculate the range
-  const range = to - from;
+  // Calculate ranges for both axes
+  const rangeX = toX - fromX;
+  const rangeY = toY - fromY;
   
-  // Get the magnitude of the range on a log10 scale
-  const magnitude = Math.log10(range);
+  // Use the smaller range to determine grid steps for both axes
+  // This ensures grid resolution is synchronized between X and Y
+  const minRange = Math.min(rangeX, rangeY);
   
-  // Calculate grid steps based on the magnitude
-  const majorMagnitude = Math.floor(magnitude);
-  const majorStep = Math.pow(10, majorMagnitude);
+  // Use the same magnitude for both axes to ensure synchronization
+  const magnitude = Math.floor(Math.log10(minRange));
+  const majorStep = Math.pow(10, magnitude);
   const minorStep = majorStep / 10;
   
-  // Determine how far we are through the current zoom level
-  const zoomProgress = 1 - (magnitude - majorMagnitude);
+  // Calculate aligned starting positions for gridlines
+  // This ensures grid lines are positioned at "nice" numbers like 0, 10, 20, etc.
+  const xStart = Math.floor(fromX / majorStep) * majorStep;
+  const yStart = Math.floor(fromY / majorStep) * majorStep;
   
-  // Calculate opacity - we want opacity to start at 0 when we've just zoomed in
-  // and increase to 1 as we continue to zoom in
-  // This creates a natural fading effect as grid lines become more relevant
+  // Calculate the opacity based on zoom level (same for both axes)
+  const magnitude_exact = Math.log10(minRange);
+  const zoomProgress = 1 - (magnitude_exact - magnitude);
   const subgridOpacity = Math.max(0, Math.min(1, zoomProgress));
   
-  // Generate main grid lines (major grid)
-  const grid: number[] = [];
-  const firstMajorLine = Math.ceil(from / majorStep) * majorStep;
-  for (let i = firstMajorLine; i <= to; i += majorStep) {
-    grid.push(Number(i.toFixed(10)));
+  // Generate grid lines for X axis
+  const gridX: number[] = [];
+  const subgridX: number[] = [];
+  
+  // Generate grid lines for Y axis
+  const gridY: number[] = [];
+  const subgridY: number[] = [];
+  
+  // Generate major grid lines for X axis
+  for (let i = xStart; i <= toX + majorStep; i += majorStep) {
+    gridX.push(i);
   }
   
-  // Generate subgrid lines (minor grid)
-  const subgrid: number[] = [];
-  const firstMinorLine = Math.ceil(from / minorStep) * minorStep;
-  for (let i = firstMinorLine; i <= to; i += minorStep) {
+  // Generate major grid lines for Y axis
+  for (let i = yStart; i <= toY + majorStep; i += majorStep) {
+    gridY.push(i);
+  }
+  
+  // Generate minor grid lines for X axis
+  const xMinorStart = Math.floor(fromX / minorStep) * minorStep;
+  for (let i = xMinorStart; i <= toX + minorStep; i += minorStep) {
     // Skip if this line is already in the main grid
     if (Math.abs(i % majorStep) < minorStep / 100) continue;
-    subgrid.push(Number(i.toFixed(10)));
+    subgridX.push(i);
   }
   
-  // Log relevant info for debugging
-  console.log({
-    range,
-    magnitude,
-    majorStep,
-    minorStep,
-    zoomProgress,
-    subgridOpacity
-  });
+  // Generate minor grid lines for Y axis
+  const yMinorStart = Math.floor(fromY / minorStep) * minorStep;
+  for (let i = yMinorStart; i <= toY + minorStep; i += minorStep) {
+    // Skip if this line is already in the main grid
+    if (Math.abs(i % majorStep) < minorStep / 100) continue;
+    subgridY.push(i);
+  }
   
   return {
-    grid,
-    subgrid,
-    subgridOpacity,
+    x: {
+      grid: gridX,
+      subgrid: subgridX
+    },
+    y: {
+      grid: gridY,
+      subgrid: subgridY
+    },
+    subgridOpacity
   };
 }
 
