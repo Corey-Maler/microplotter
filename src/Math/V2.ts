@@ -14,7 +14,14 @@ export class V2 {
     return new V2(this.x - v.x, this.y - v.y);
   }
 
+  /**
+  * @deprecated use .scale instead
+  */
   public mul(s: number) {
+    return new V2(this.x * s, this.y * s);
+  }
+
+  public scale(s: number) {
     return new V2(this.x * s, this.y * s);
   }
 
@@ -110,6 +117,10 @@ export class V2 {
 
   public get angle() {
     return Math.atan2(this.y, this.x);
+  }
+
+  public angleTo(to: V2) {
+    return this.sub(to).angle;
   }
 
   public setAngle(angle: number) {

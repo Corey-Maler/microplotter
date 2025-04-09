@@ -1,5 +1,6 @@
 import { type M3, Rect2D, V2 } from '@/Math';
 import { incrPerfCounter } from '../../components/Perf/model';
+import { V2$ } from '../cells/v2s';
 
 // NOTE, this is not "native" batch, but abstract
 
@@ -184,8 +185,12 @@ export class Batch {
     this.ll.fill();
   };
 
-  renderText = (text: string, p: V2, size?: number) => {
-    this.ll.fillText(text, p, this.color, size);
+  renderText = (text: string, p: V2 | V2$, size?: number) => {
+    if (p instanceof V2$) {
+      this.ll.fillText(text, p.value, this.color, size);
+    } else {
+      this.ll.fillText(text, p, this.color, size);
+    }
   };
 
   point = (p: V2) => {

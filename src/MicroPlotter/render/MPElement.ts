@@ -1,6 +1,8 @@
-import { V2 } from '@/Math';
-import type { MicroPlotterEngine } from '../engine/engine';
-import type { CanvasRenderer } from './CanvasRenderer';
+import { V2 } from "@/Math";
+import type { MicroPlotterEngine } from "../engine/engine";
+import type { CanvasRenderer } from "./CanvasRenderer";
+import { Cell } from "../cells/cell";
+import { Children } from "react";
 
 export interface Constraint {
   value: string;
@@ -8,8 +10,14 @@ export interface Constraint {
 }
 
 export abstract class MPElement {
-  public rotation = 0;
-  public origin: V2 = new V2(0, 0);
+  public rotation: number | Cell<number> = 0;
+
+  // Origin by default should not be set from the outside of a component
+  protected _origin: V2 = new V2(0, 0);
+  public get origin(): V2 {
+    return this._origin;
+  }
+
   protected _engine?: MicroPlotterEngine;
   protected _parent?: MPElement;
   protected get engine(): MicroPlotterEngine | undefined {
@@ -32,7 +40,6 @@ export abstract class MPElement {
     if (!this.children) {
       this.children = [];
     }
-    console.log('SETUP! child', this.engine);
     this.children.push(child);
     child._parent = this;
   }
@@ -52,7 +59,9 @@ export abstract class MPElement {
     // updates goes from down to up
     this.recalculateConstraints();
     if (this.children) {
-      this.children.forEach((child) => child.doUpdate(dt));
+      for (const child of this.children) {
+        child.doUpdate(dt);
+      }
     }
     this.update(dt);
   }
@@ -79,6 +88,6 @@ export abstract class MPElement {
   }
 
   render(renderer: CanvasRenderer) {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 }
