@@ -1,7 +1,7 @@
-import { V2, M3, Rect2D } from "@/Math";
-import { LL } from "./Batch";
-import { ColorCache } from "./ColorCache";
-import { GridShader } from "./GridShader";
+import { M3, type Rect2D, type V2 } from '@/Math';
+import type { LL } from './Batch';
+import { ColorCache } from './ColorCache';
+import { GridShader } from './GridShader';
 
 const vertexShaderSource = `#version 300 es
 
@@ -42,7 +42,11 @@ void main() {
 }
 `;
 
-function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
+function createShader(
+  gl: WebGL2RenderingContext,
+  type: number,
+  source: string,
+): WebGLShader | null {
   const shader = gl.createShader(type);
   if (!shader) return null;
 
@@ -58,7 +62,11 @@ function createShader(gl: WebGL2RenderingContext, type: number, source: string):
   return null;
 }
 
-function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
+function createProgram(
+  gl: WebGL2RenderingContext,
+  vertexShader: WebGLShader,
+  fragmentShader: WebGLShader,
+): WebGLProgram | null {
   const program = gl.createProgram();
   if (!program) return null;
 
@@ -86,7 +94,7 @@ export class WebGLBatchLL implements LL {
   private lineWidthLocation: WebGLUniformLocation | null;
   private viewMatrix: M3 = new M3();
   private colorCache: ColorCache;
-  
+
   // Grid shader instance
   private gridShader: GridShader;
 
@@ -101,7 +109,11 @@ export class WebGLBatchLL implements LL {
     gl.bindVertexArray(this.vao);
 
     // Set the view matrix uniform once for the entire render
-    gl.uniformMatrix3fv(this.viewMatrixLocation, false, this.viewMatrix.getFloatArray());
+    gl.uniformMatrix3fv(
+      this.viewMatrixLocation,
+      false,
+      this.viewMatrix.getFloatArray(),
+    );
   }
 
   public finishRender() {
@@ -111,13 +123,13 @@ export class WebGLBatchLL implements LL {
   constructor(canvas: HTMLCanvasElement) {
     console.log('WebGLBatch.constructor');
 
-    const gl = canvas.getContext("webgl2", { 
+    const gl = canvas.getContext('webgl2', {
       premultipliedAlpha: false,
-      alpha: true 
+      alpha: true,
     });
     if (!gl) {
       // no webgl2 for you!
-      throw new Error('NO WEBGL2')
+      throw new Error('NO WEBGL2');
     }
     this.gl = gl;
 
@@ -127,7 +139,11 @@ export class WebGLBatchLL implements LL {
     gl.blendEquation(gl.FUNC_ADD);
 
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    const fragmentShader = createShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      fragmentShaderSource,
+    );
 
     if (!vertexShader || !fragmentShader) {
       throw new Error('Failed to create shaders');
@@ -139,10 +155,13 @@ export class WebGLBatchLL implements LL {
     }
 
     this.program = program;
-    this.positionAttributeLocation = gl.getAttribLocation(program, "a_position");
-    this.viewMatrixLocation = gl.getUniformLocation(program, "u_viewMatrix");
-    this.colorLocation = gl.getUniformLocation(program, "u_color");
-    this.lineWidthLocation = gl.getUniformLocation(program, "u_lineWidth");
+    this.positionAttributeLocation = gl.getAttribLocation(
+      program,
+      'a_position',
+    );
+    this.viewMatrixLocation = gl.getUniformLocation(program, 'u_viewMatrix');
+    this.colorLocation = gl.getUniformLocation(program, 'u_color');
+    this.lineWidthLocation = gl.getUniformLocation(program, 'u_lineWidth');
 
     // Create a single buffer for points that we'll reuse
     this.pointsBuffer = gl.createBuffer();
@@ -162,13 +181,19 @@ export class WebGLBatchLL implements LL {
 
     gl.enableVertexAttribArray(this.positionAttributeLocation);
 
-    const size = 2;          // 2 components per iteration
-    const type = gl.FLOAT;   // the data is 32bit floats
+    const size = 2; // 2 components per iteration
+    const type = gl.FLOAT; // the data is 32bit floats
     const normalize = false; // don't normalize the data
-    const stride = 0;        // 0 = move forward size * sizeof(type) each iteration
-    const offset = 0;        // start at the beginning of the buffer
+    const stride = 0; // 0 = move forward size * sizeof(type) each iteration
+    const offset = 0; // start at the beginning of the buffer
     gl.vertexAttribPointer(
-      this.positionAttributeLocation, size, type, normalize, stride, offset)
+      this.positionAttributeLocation,
+      size,
+      type,
+      normalize,
+      stride,
+      offset,
+    );
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -185,7 +210,13 @@ export class WebGLBatchLL implements LL {
     this.gridShader = new GridShader(gl);
   }
 
-  p3(points: Float32Array, offsets: number[], sizes: number[], colors: string[], lineWidth: number = 1) {
+  p3(
+    points: Float32Array,
+    offsets: number[],
+    sizes: number[],
+    colors: string[],
+    lineWidth = 1,
+  ) {
     const gl = this.gl;
 
     // Bind the VAO
@@ -241,23 +272,23 @@ export class WebGLBatchLL implements LL {
   public p(points: number[]): void {
     // Convert the number array to Float32Array
     const float32Points = new Float32Array(points);
-    
+
     // Reuse the existing renderPoints method
-    const defaultColor = "black";
+    const defaultColor = 'black';
     const defaultSize = 1;
     this.renderPoints(float32Points, defaultColor, defaultSize);
   }
 
   /**
    * Renders an array of points using WebGL's GL_POINTS primitive
-   * 
+   *
    * @param points - Float32Array containing x,y pairs for each point
    * @param color - Color to use for the points
    * @param pointSize - Size of each point in pixels
    */
-  public renderPoints(points: Float32Array, color: string, pointSize: number = 1) {
+  public renderPoints(points: Float32Array, color: string, pointSize = 1) {
     const gl = this.gl;
-    
+
     // Ensure the blend function is properly set for transparency
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -272,8 +303,14 @@ export class WebGLBatchLL implements LL {
 
     // Get color from cache
     const parsedColor = this.colorCache.getColor(color);
-    gl.uniform4f(this.colorLocation, parsedColor[0], parsedColor[1], parsedColor[2], parsedColor[3]);
-    
+    gl.uniform4f(
+      this.colorLocation,
+      parsedColor[0],
+      parsedColor[1],
+      parsedColor[2],
+      parsedColor[3],
+    );
+
     // Set point size
     gl.uniform1f(this.lineWidthLocation, pointSize);
 
@@ -329,7 +366,7 @@ export class WebGLBatchLL implements LL {
 
   /**
    * Renders grid dots directly using a dedicated shader
-   * 
+   *
    * @param viewArea - The visible area in world coordinates
    * @param density - Grid density factor
    * @param gridColor - Color for major grid points
@@ -338,21 +375,23 @@ export class WebGLBatchLL implements LL {
    */
   public renderGridDots(
     viewArea: Rect2D,
-    density: number = 0, 
-    gridColor: string = '#dddddd',
-    subgridOpacity: number = 0.5,
-    dotSize: number = 2
+    density = 0,
+    gridColor = '#dddddd',
+    subgridOpacity = 0.5,
+    dotSize = 2,
   ) {
     // Calculate adjusted opacity for subgrid
     // Map original opacity range [0, 0.5] to 0
     // Map original opacity range [0.5, 1] to [0, 1] linearly
-    const adjustedOpacity = subgridOpacity <= 0.5 ? 0 : (subgridOpacity - 0.5) * 2;
-    
+    const adjustedOpacity =
+      subgridOpacity <= 0.5 ? 0 : (subgridOpacity - 0.5) * 2;
+
     // Skip rendering subgrid if opacity is too low
-    const subgridColor = adjustedOpacity < 0.1 
-      ? 'rgba(221, 221, 221, 0)' // Fully transparent
-      : `rgba(221, 221, 221, ${adjustedOpacity})`;
-    
+    const subgridColor =
+      adjustedOpacity < 0.1
+        ? 'rgba(221, 221, 221, 0)' // Fully transparent
+        : `rgba(221, 221, 221, ${adjustedOpacity})`;
+
     // Use the grid shader to render dots
     this.gridShader.render(
       viewArea,
@@ -360,7 +399,7 @@ export class WebGLBatchLL implements LL {
       density,
       gridColor,
       subgridColor,
-      dotSize
+      dotSize,
     );
   }
 }

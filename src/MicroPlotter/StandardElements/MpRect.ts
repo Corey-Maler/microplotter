@@ -1,6 +1,6 @@
-import { Rect2D, V2 } from "@/Math";
-import { MPElement } from "../render/MPElement";
-import { CanvasRenderer } from "../render/CanvasRenderer";
+import { Rect2D, type V2 } from '@/Math';
+import type { CanvasRenderer } from '../render/CanvasRenderer';
+import { MPElement } from '../render/MPElement';
 
 export class MPRect extends MPElement {
   public rect: Rect2D;
@@ -12,7 +12,7 @@ export class MPRect extends MPElement {
   }
 
   render(renderer: CanvasRenderer): void {
-    const { rect, stroke } = renderer.batch("orange");
+    const { rect, stroke } = renderer.batch('orange');
     rect(this.rect);
     stroke();
   }

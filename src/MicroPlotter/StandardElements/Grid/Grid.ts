@@ -1,15 +1,15 @@
-import { V2 } from "@/Math";
-import { MPElement } from "../../render/MPElement";
-import { CanvasRenderer } from "../../render/CanvasRenderer";
-import { Colors } from "../../render/colors";
-import { getAdaptiveGrid } from "./getAdaptiveGrid";
+import { V2 } from '@/Math';
+import type { CanvasRenderer } from '../../render/CanvasRenderer';
+import { MPElement } from '../../render/MPElement';
+import { Colors } from '../../render/colors';
+import { getAdaptiveGrid } from './getAdaptiveGrid';
 
 /**
  * Grid rendering mode
  */
 export enum GridMode {
-  LINES,
-  DOTS
+  LINES = 0,
+  DOTS = 1,
 }
 
 export class Grid extends MPElement {
@@ -18,14 +18,14 @@ export class Grid extends MPElement {
    * - 0: Standard grid density (default)
    * - 1: Higher level of detail with finer grid lines
    */
-  public density: number = 0;
-  
+  public density = 0;
+
   /**
    * Determines how the grid is rendered (lines or dots)
    */
   public mode: GridMode = GridMode.LINES;
 
-  constructor(density: number = 0, mode: GridMode = GridMode.LINES) {
+  constructor(density = 0, mode: GridMode = GridMode.LINES) {
     super();
     this.density = density;
     this.mode = mode;
@@ -37,13 +37,13 @@ export class Grid extends MPElement {
     // Use the refactored getAdaptiveGrid function to generate synchronized grid lines
     // Pass the density parameter for grid detail control
     const gridResult = getAdaptiveGrid(
-      v.bottomLeft.x, 
-      v.topRight.x, 
-      v.bottomLeft.y, 
+      v.bottomLeft.x,
+      v.topRight.x,
+      v.bottomLeft.y,
       v.topRight.y,
-      this.density
+      this.density,
     );
-    
+
     // Extract grid lines and opacity
     const gridX = gridResult.x;
     const gridY = gridResult.y;
@@ -58,19 +58,21 @@ export class Grid extends MPElement {
         this.density,
         '#dddddd', // Grid primary color
         subgridOpacity,
-        2 // Dot size
+        2, // Dot size
       );
     }
   }
 
   private renderLines(
-    renderer: CanvasRenderer, 
-    gridX: { grid: number[]; subgrid: number[] }, 
-    gridY: { grid: number[]; subgrid: number[] }, 
-    subgridOpacity: number
+    renderer: CanvasRenderer,
+    gridX: { grid: number[]; subgrid: number[] },
+    gridY: { grid: number[]; subgrid: number[] },
+    subgridOpacity: number,
   ) {
-    const { line, stroke, renew } = renderer.batch(Colors.grid.secondary(subgridOpacity));
-    
+    const { line, stroke, renew } = renderer.batch(
+      Colors.grid.secondary(subgridOpacity),
+    );
+
     const v = renderer.visibleArea;
     const x0 = v.bottomLeft.x;
     const y0 = v.bottomLeft.y;
@@ -102,4 +104,3 @@ export class Grid extends MPElement {
     stroke();
   }
 }
-

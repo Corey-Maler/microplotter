@@ -1,15 +1,15 @@
-import { M3, V2, Rect2D } from "@/Math";
-import { Colors } from "./colors";
-import { printDebugValue } from "../../components/Perf/model";
-import { Batch, LL, LLSoftware } from "./Batch";
-import { WebGLBatchLL } from "./WebGLBatch";
-import { MouseEventHandlers } from "./MouseEventHandlers";
-import { PanningTracker } from "./PanningTracker";
-import { ViewPort } from "./ViewPort";
-import { MPElement } from "./MPElement";
+import { M3, Rect2D, V2 } from '@/Math';
+import { printDebugValue } from '../../components/Perf/model';
+import { Batch, type LL, LLSoftware } from './Batch';
+import type { MPElement } from './MPElement';
+import { MouseEventHandlers } from './MouseEventHandlers';
+import { PanningTracker } from './PanningTracker';
+import { ViewPort } from './ViewPort';
+import { WebGLBatchLL } from './WebGLBatch';
+import { Colors } from './colors';
 
 export class CanvasRenderer {
-  protected rootDiv = document.createElement("div");
+  protected rootDiv = document.createElement('div');
   public readonly ll: LL;
   // without transform, so 10 - is 10 pixels
   public readonly llScreenSpace: LL;
@@ -22,7 +22,7 @@ export class CanvasRenderer {
 
   public get webGL(): WebGLBatchLL {
     if (!this._webGlLL) {
-      throw new Error("WebGL LL is not yet setup");
+      throw new Error('WebGL LL is not yet setup');
     }
     return this._webGlLL;
   }
@@ -91,19 +91,19 @@ export class CanvasRenderer {
   }
 
   private setupStyles() {
-    this.canvas.style.position = "absolute";
-    this.canvas.style.top = "0px";
-    this.canvas.style.left = "0px";
-    this.canvas.style.zIndex = "1";
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = '0px';
+    this.canvas.style.left = '0px';
+    this.canvas.style.zIndex = '1';
 
-    this.webGlCanvas.style.position = "absolute";
-    this.webGlCanvas.style.top = "0px";
-    this.webGlCanvas.style.left = "0px";
-    this.webGlCanvas.style.pointerEvents = "none";
-    this.webGlCanvas.style.zIndex = "3";
+    this.webGlCanvas.style.position = 'absolute';
+    this.webGlCanvas.style.top = '0px';
+    this.webGlCanvas.style.left = '0px';
+    this.webGlCanvas.style.pointerEvents = 'none';
+    this.webGlCanvas.style.zIndex = '3';
 
-    this.rootDiv.style.position = "relative";
-    this.rootDiv.style.flex = "1";
+    this.rootDiv.style.position = 'relative';
+    this.rootDiv.style.flex = '1';
   }
 
   private setupObserver() {
@@ -119,11 +119,11 @@ export class CanvasRenderer {
   }
 
   constructor(private readonly simpleEngine: { requestUpdate: () => void }) {
-    const canvas = document.createElement("canvas");
-    const webGlCanvas = document.createElement("canvas");
-    
+    const canvas = document.createElement('canvas');
+    const webGlCanvas = document.createElement('canvas');
+
     // Set the WebGL canvas to have proper transparency
-    webGlCanvas.style.backgroundColor = "transparent";
+    webGlCanvas.style.backgroundColor = 'transparent';
 
     this.canvas = canvas;
     this.webGlCanvas = webGlCanvas;
@@ -144,7 +144,7 @@ export class CanvasRenderer {
       requestUpdate,
     );
 
-    const ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext('2d')!;
     this.ctx = ctx;
 
     this.ll = new LLSoftware(this.viewMatrix, ctx);
@@ -162,16 +162,16 @@ export class CanvasRenderer {
     this.canvas.width = x * ratio;
     this.canvas.height = y * ratio;
 
-    this.canvas.style.width = x + "px";
-    this.canvas.style.height = y + "px";
+    this.canvas.style.width = x + 'px';
+    this.canvas.style.height = y + 'px';
 
     this.webGlCanvas.width = x * ratio;
     this.webGlCanvas.height = y * ratio;
 
     this._webGlLL?.resize(x * ratio, y * ratio);
 
-    this.webGlCanvas.style.width = x + "px";
-    this.webGlCanvas.style.height = y + "px";
+    this.webGlCanvas.style.width = x + 'px';
+    this.webGlCanvas.style.height = y + 'px';
 
     this.panningTracker.updateWorldSpaceMatrix();
     this.panningTracker.recalculate();
@@ -190,7 +190,7 @@ export class CanvasRenderer {
       // return;
     }
 
-    printDebugValue("zoom", this.panningTracker.zoom);
+    printDebugValue('zoom', this.panningTracker.zoom);
 
     this.updated = false;
 
@@ -207,8 +207,8 @@ export class CanvasRenderer {
   }
 
   private renderFPS(dt: number) {
-    const { renderText } = this.batchScreenSpace("#333333");
-    renderText("FPS: " + Math.round(1 / (dt / 1000)), new V2(10, 20));
+    const { renderText } = this.batchScreenSpace('#333333');
+    renderText('FPS: ' + Math.round(1 / (dt / 1000)), new V2(10, 20));
   }
 
   public measureText(text: string) {
@@ -258,8 +258,8 @@ export class CanvasRenderer {
 
   public webGlBatch(color?: string) {
     if (!this._webGlLL) {
-      throw new Error("Webgl LL is not yet setup");
+      throw new Error('Webgl LL is not yet setup');
     }
-    return new Batch(this._webGlLL, color || "black", 1);
+    return new Batch(this._webGlLL, color || 'black', 1);
   }
 }

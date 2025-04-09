@@ -1,6 +1,6 @@
-import { Rect2D, V2 } from "@/Math";
-import { CanvasRenderer } from "@/MicroPlotter/render/CanvasRenderer";
-import { MPElement } from "@/MicroPlotter/render/MPElement";
+import type { Rect2D, V2 } from '@/Math';
+import type { CanvasRenderer } from '@/MicroPlotter/render/CanvasRenderer';
+import { MPElement } from '@/MicroPlotter/render/MPElement';
 
 export class MyNode extends MPElement {
   public rect: Rect2D;

@@ -1,9 +1,9 @@
-import { V2 } from "@/Math";
+import { V2 } from '@/Math';
 
 export class ViewPort {
   public width: number;
   public height: number;
-  public HDPI: number =  window.devicePixelRatio || 1;
+  public HDPI: number = window.devicePixelRatio || 1;
 
   constructor(width: number, height: number) {
     this.width = width;

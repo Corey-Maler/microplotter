@@ -1,2 +1,2 @@
 export { MicroPlotterEngine } from './engine/engine';
-export { MicroPlotter } from './React'
+export { MicroPlotter } from './React';

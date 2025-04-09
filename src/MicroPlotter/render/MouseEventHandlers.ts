@@ -1,10 +1,10 @@
-import { V2 } from "@/Math";
-import { PanningTracker } from "./PanningTracker";
-import { ViewPort } from "./ViewPort";
-import { Observable } from "@/utils/observable";
+import { V2 } from '@/Math';
+import { Observable } from '@/utils/observable';
+import type { PanningTracker } from './PanningTracker';
+import type { ViewPort } from './ViewPort';
 
 export class MouseEventHandlers {
-  private mouseMode: "trackpad" | "mouse" = "trackpad";
+  private mouseMode: 'trackpad' | 'mouse' = 'trackpad';
   public mousePosition: V2 = new V2(0, 0);
   public $mousePositionScreen: Observable<V2> = new Observable();
   public $mousePositionWorld: Observable<V2> = new Observable();
@@ -38,13 +38,13 @@ export class MouseEventHandlers {
   }
 
   private setupEventListeners() {
-    this.canvas.addEventListener("mousedown", this.onMouseDown);
-    this.canvas.addEventListener("mousemove", this.onMouseMove);
-    this.canvas.addEventListener("mouseup", this.onMouseUp);
-    this.canvas.addEventListener("wheel", this.onMouseScroll, {
+    this.canvas.addEventListener('mousedown', this.onMouseDown);
+    this.canvas.addEventListener('mousemove', this.onMouseMove);
+    this.canvas.addEventListener('mouseup', this.onMouseUp);
+    this.canvas.addEventListener('wheel', this.onMouseScroll, {
       passive: false,
     });
-    this.canvas.addEventListener("click", this.onClick);
+    this.canvas.addEventListener('click', this.onClick);
   }
 
   public activateEditMode = (props: {
@@ -52,7 +52,7 @@ export class MouseEventHandlers {
     onMove?: (point: V2) => void;
     onEnd: (point: V2) => void;
     onStart: (point: V2) => void;
-    mode: "auto" | "clicks" | "drag&drop";
+    mode: 'auto' | 'clicks' | 'drag&drop';
     autorerender?: boolean;
   }) => {
     this.dragging = false; // not sure, but probably should be this
@@ -85,28 +85,30 @@ export class MouseEventHandlers {
 
     subscriptions.push(unsubscribeFromClicks);
 
-    if (mode === "drag&drop" || mode === "auto") {
-      const unsubscribeDragging = this.$mouseDraggingFromScreen.subscribe((point) => {
-        unsubscribeFromClicks();
-        unsubscribeDragging();
-        onStart?.(this.panningTracker.screenToWorld(point));
+    if (mode === 'drag&drop' || mode === 'auto') {
+      const unsubscribeDragging = this.$mouseDraggingFromScreen.subscribe(
+        (point) => {
+          unsubscribeFromClicks();
+          unsubscribeDragging();
+          onStart?.(this.panningTracker.screenToWorld(point));
 
+          if (onMove) {
+            const moveUnsubscribe = this.$mousePositionWorld.subscribe(onMove);
+            subscriptions.push(moveUnsubscribe);
+          }
 
-        if (onMove) {
-          const moveUnsubscribe = this.$mousePositionWorld.subscribe(onMove);
-          subscriptions.push(moveUnsubscribe);
-        }
-
-        if (onEnd) {
-          const mouseUpUnsubscribe = this.$mouseUpScreen.subscribe((point) => {
-            onEnd(this.panningTracker.screenToWorld(point));
-          });
-          subscriptions.push(mouseUpUnsubscribe);
-        }
-      });
+          if (onEnd) {
+            const mouseUpUnsubscribe = this.$mouseUpScreen.subscribe(
+              (point) => {
+                onEnd(this.panningTracker.screenToWorld(point));
+              },
+            );
+            subscriptions.push(mouseUpUnsubscribe);
+          }
+        },
+      );
 
       subscriptions.push(unsubscribeDragging);
-
     }
 
     return () => {
@@ -137,7 +139,7 @@ export class MouseEventHandlers {
     const { movementX, movementY } = event;
 
     if (this.mouseDraggingFrom?.withinDistance(v2, 10)) {
-      console.log("dragging mode, not clicks mode");
+      console.log('dragging mode, not clicks mode');
       this.$mouseDraggingFromScreen.next(v2);
     }
 
@@ -198,7 +200,7 @@ export class MouseEventHandlers {
   private onMouseScroll = (e: WheelEvent) => {
     e.preventDefault();
 
-    if (this.mouseMode === "trackpad") {
+    if (this.mouseMode === 'trackpad') {
       const ratio = this.viewPortTracker.HDPI;
 
       const { deltaX, deltaY } = e;

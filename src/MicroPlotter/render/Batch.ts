@@ -1,5 +1,5 @@
-import { M3, Rect2D, V2 } from "@/Math";
-import { incrPerfCounter } from "../../components/Perf/model";
+import { type M3, Rect2D, V2 } from '@/Math';
+import { incrPerfCounter } from '../../components/Perf/model';
 
 // NOTE, this is not "native" batch, but abstract
 
@@ -84,7 +84,6 @@ export class LLSoftware implements LL {
     const p = this.viewMatrix.multiplyV2(v);
     this.ctx.arc(p.x, p.y, radius, startAngle, endAngle);
   }
-
 }
 
 /* for native if needed
@@ -117,7 +116,11 @@ protected transformToViewSpace() {
 
 export class Batch {
   private color: string;
-  constructor(private readonly ll: LL, color: string, private lineWidth = 1) {
+  constructor(
+    private readonly ll: LL,
+    color: string,
+    private lineWidth = 1,
+  ) {
     this.color = color;
 
     this.renew();
@@ -129,17 +132,16 @@ export class Batch {
     }
     //this.ctx.beginPath();
     this.ll.beginPath();
-  }
-
+  };
 
   line = (start: V2, end: V2) => {
     this.ll.moveTo(start);
     this.ll.lineTo(end);
-  }
+  };
 
   p = (points: number[]) => {
     this.ll.p(points);
-  }
+  };
 
   path = (points: V2[]) => {
     if (points.length < 2) {
@@ -153,7 +155,7 @@ export class Batch {
     for (let i = 1; i < points.length; i++) {
       this.ll.lineTo(points[i]);
     }
-  }
+  };
 
   rect = (p1: V2 | Rect2D, p2?: V2) => {
     if (p1 instanceof Rect2D) {
@@ -170,25 +172,25 @@ export class Batch {
     this.ll.lineTo(p2);
     this.ll.lineTo(new V2(p2.x, p1.y));
     this.ll.lineTo(p1);
-  }
+  };
 
   stroke = () => {
     this.ll.strokeStyle = this.color;
     this.ll.stroke();
-  }
+  };
 
   fill = () => {
     this.ll.fillStyle = this.color;
     this.ll.fill();
-  }
+  };
 
   renderText = (text: string, p: V2, size?: number) => {
     this.ll.fillText(text, p, this.color, size);
-  }
+  };
 
   point = (p: V2) => {
     this.ll.arc(p, 5);
     // this.ll.rect()
     return this;
-  }
+  };
 }

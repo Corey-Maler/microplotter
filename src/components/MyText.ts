@@ -1,12 +1,12 @@
-import { V2 } from "@/Math";
-import { CanvasRenderer } from "@/MicroPlotter/render/CanvasRenderer";
-import { MPElement } from "@/MicroPlotter/render/MPElement";
+import type { V2 } from '@/Math';
+import type { CanvasRenderer } from '@/MicroPlotter/render/CanvasRenderer';
+import { MPElement } from '@/MicroPlotter/render/MPElement';
 
 export class MyText extends MPElement {
   public text = 'Hello!';
   public position: V2;
   constructor(pos: V2) {
-    super()
+    super();
     this.position = pos;
   }
   render(renderer: CanvasRenderer) {

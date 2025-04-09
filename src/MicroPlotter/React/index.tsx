@@ -27,10 +27,14 @@ export const MicroPlotter = ({ onSetup }: MicroPlotterProps) => {
         }
       }
     },
-    [onSetup]
+    [onSetup],
   );
 
   return (
-    <div style={{ flex: '1 1 auto', display: 'flex' }} className="microplotter-attachment" ref={canvasContainerRef}></div>
+    <div
+      style={{ flex: '1 1 auto', display: 'flex' }}
+      className="microplotter-attachment"
+      ref={canvasContainerRef}
+    ></div>
   );
 };

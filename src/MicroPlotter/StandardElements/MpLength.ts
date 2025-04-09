@@ -1,9 +1,9 @@
-import { V2 } from "@/Math";
-import { MPElement } from "../render/MPElement";
-import { CanvasRenderer } from "../render/CanvasRenderer";
-import { MPText } from "./MpText";
-import { MPPoint } from "./MpPoint";
-import { MPLine } from "./MpLine";
+import { V2 } from '@/Math';
+import type { CanvasRenderer } from '../render/CanvasRenderer';
+import { MPElement } from '../render/MPElement';
+import { MPLine } from './MpLine';
+import { MPPoint } from './MpPoint';
+import { MPText } from './MpText';
 
 const MAGIC_PADDING = 0.01;
 
@@ -20,10 +20,10 @@ export class MPLenght extends MPElement {
   }
 
   public set p1p2(value: [V2, V2]) {
-    const p1 = value[0]
-    const p2 = value[1]
+    const p1 = value[0];
+    const p2 = value[1];
     const diff = p2.sub(p1);
-    const pad = this.offsetVector.setAngle(diff.angle + Math.PI / 2)
+    const pad = this.offsetVector.setAngle(diff.angle + Math.PI / 2);
 
     this._p1 = p1.add(pad);
     this._p2 = p2.add(pad);
@@ -58,32 +58,29 @@ export class MPLenght extends MPElement {
   }
 
   public showLenght() {
-      const dist = this.p1.distanceTo(this.p2);
-      const center = this.p1.add(this.p2).mul(0.5);
+    const dist = this.p1.distanceTo(this.p2);
+    const center = this.p1.add(this.p2).mul(0.5);
 
-      this.lenghtText = new MPText(dist.toFixed(2), center);
-      this.appendChild(this.lenghtText);
+    this.lenghtText = new MPText(dist.toFixed(2), center);
+    this.appendChild(this.lenghtText);
 
-      const lt = this.lenghtText;
-      lt.color = LENGHT_COLOR
+    const lt = this.lenghtText;
+    lt.color = LENGHT_COLOR;
 
-      lt.constrain(
-        'text',
-        () => this.length.toFixed(2)
-      )
+    lt.constrain('text', () => this.length.toFixed(2));
 
-      lt.constrain('center', () => this.middle);
-      lt.constrain('rotation', () => {
-        const PI = Math.PI;
-        const angle = this.angle;
-        if (angle > (PI / 2)) {
-          return angle - PI;
-        }
-        if (angle < (-PI / 2)) {
-          return angle + PI;
-        }
-        return angle;
-      });
+    lt.constrain('center', () => this.middle);
+    lt.constrain('rotation', () => {
+      const PI = Math.PI;
+      const angle = this.angle;
+      if (angle > PI / 2) {
+        return angle - PI;
+      }
+      if (angle < -PI / 2) {
+        return angle + PI;
+      }
+      return angle;
+    });
   }
 
   private setupLeftAndRight() {
@@ -96,8 +93,8 @@ export class MPLenght extends MPElement {
     this.leftLine = leftLine;
     this.rightLine = rightLine;
 
-    this.appendChild(leftLine)
-    this.appendChild(rightLine)
+    this.appendChild(leftLine);
+    this.appendChild(rightLine);
 
     leftLine.constrain('p1', () => this.p1);
     leftLine.constrain('p2', () => {
@@ -130,11 +127,8 @@ export class MPLenght extends MPElement {
     this._p2 = new V2(0, 0);
 
     this.showLenght();
-    this.setupLeftAndRight()
+    this.setupLeftAndRight();
   }
 
-  render(renderer: CanvasRenderer): void {
-
-  }
-
+  render(renderer: CanvasRenderer): void {}
 }

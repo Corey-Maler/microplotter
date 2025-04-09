@@ -1,4 +1,4 @@
-import { V2 } from "./V2";
+import { V2 } from './V2';
 
 const M3Indexes = {
   M00: 0,
@@ -116,30 +116,59 @@ export class M3 {
 
   public multiplyV2(v: V2) {
     return new V2(
-        v.x * this.matrix[M3Indexes.M00] + v.y * this.matrix[M3Indexes.M10] + this.matrix[M3Indexes.M20],
-        v.x * this.matrix[M3Indexes.M01] + v.y * this.matrix[M3Indexes.M11] + this.matrix[M3Indexes.M21],
+      v.x * this.matrix[M3Indexes.M00] +
+        v.y * this.matrix[M3Indexes.M10] +
+        this.matrix[M3Indexes.M20],
+      v.x * this.matrix[M3Indexes.M01] +
+        v.y * this.matrix[M3Indexes.M11] +
+        this.matrix[M3Indexes.M21],
     );
   }
 
   public inverse() {
     const output = new M3();
     const m = this.matrix;
-    const det = m[M3Indexes.M00] * (m[M3Indexes.M11] * m[M3Indexes.M22] - m[M3Indexes.M12] * m[M3Indexes.M21]) -
-      m[M3Indexes.M01] * (m[M3Indexes.M10] * m[M3Indexes.M22] - m[M3Indexes.M12] * m[M3Indexes.M20]) +
-      m[M3Indexes.M02] * (m[M3Indexes.M10] * m[M3Indexes.M21] - m[M3Indexes.M11] * m[M3Indexes.M20]);
+    const det =
+      m[M3Indexes.M00] *
+        (m[M3Indexes.M11] * m[M3Indexes.M22] -
+          m[M3Indexes.M12] * m[M3Indexes.M21]) -
+      m[M3Indexes.M01] *
+        (m[M3Indexes.M10] * m[M3Indexes.M22] -
+          m[M3Indexes.M12] * m[M3Indexes.M20]) +
+      m[M3Indexes.M02] *
+        (m[M3Indexes.M10] * m[M3Indexes.M21] -
+          m[M3Indexes.M11] * m[M3Indexes.M20]);
     const invDet = 1 / det;
     output.matrix = [
-      (m[M3Indexes.M11] * m[M3Indexes.M22] - m[M3Indexes.M12] * m[M3Indexes.M21]) * invDet,
-      (m[M3Indexes.M02] * m[M3Indexes.M21] - m[M3Indexes.M01] * m[M3Indexes.M22]) * invDet,
-      (m[M3Indexes.M01] * m[M3Indexes.M12] - m[M3Indexes.M02] * m[M3Indexes.M11]) * invDet,
+      (m[M3Indexes.M11] * m[M3Indexes.M22] -
+        m[M3Indexes.M12] * m[M3Indexes.M21]) *
+        invDet,
+      (m[M3Indexes.M02] * m[M3Indexes.M21] -
+        m[M3Indexes.M01] * m[M3Indexes.M22]) *
+        invDet,
+      (m[M3Indexes.M01] * m[M3Indexes.M12] -
+        m[M3Indexes.M02] * m[M3Indexes.M11]) *
+        invDet,
 
-      (m[M3Indexes.M12] * m[M3Indexes.M20] - m[M3Indexes.M10] * m[M3Indexes.M22]) * invDet,
-      (m[M3Indexes.M00] * m[M3Indexes.M22] - m[M3Indexes.M02] * m[M3Indexes.M20]) * invDet,
-      (m[M3Indexes.M02] * m[M3Indexes.M10] - m[M3Indexes.M00] * m[M3Indexes.M12]) * invDet,
+      (m[M3Indexes.M12] * m[M3Indexes.M20] -
+        m[M3Indexes.M10] * m[M3Indexes.M22]) *
+        invDet,
+      (m[M3Indexes.M00] * m[M3Indexes.M22] -
+        m[M3Indexes.M02] * m[M3Indexes.M20]) *
+        invDet,
+      (m[M3Indexes.M02] * m[M3Indexes.M10] -
+        m[M3Indexes.M00] * m[M3Indexes.M12]) *
+        invDet,
 
-      (m[M3Indexes.M10] * m[M3Indexes.M21] - m[M3Indexes.M11] * m[M3Indexes.M20]) * invDet,
-      (m[M3Indexes.M01] * m[M3Indexes.M20] - m[M3Indexes.M00] * m[M3Indexes.M21]) * invDet,
-      (m[M3Indexes.M00] * m[M3Indexes.M11] - m[M3Indexes.M01] * m[M3Indexes.M10]) * invDet,
+      (m[M3Indexes.M10] * m[M3Indexes.M21] -
+        m[M3Indexes.M11] * m[M3Indexes.M20]) *
+        invDet,
+      (m[M3Indexes.M01] * m[M3Indexes.M20] -
+        m[M3Indexes.M00] * m[M3Indexes.M21]) *
+        invDet,
+      (m[M3Indexes.M00] * m[M3Indexes.M11] -
+        m[M3Indexes.M01] * m[M3Indexes.M10]) *
+        invDet,
     ];
     return output;
   }

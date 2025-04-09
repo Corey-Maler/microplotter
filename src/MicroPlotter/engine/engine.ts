@@ -1,6 +1,6 @@
-import { resetPerfCounters } from "../../components/Perf/model";
-import { CanvasRenderer } from "../render/CanvasRenderer";
-import { MPElement } from "../render/MPElement";
+import { resetPerfCounters } from '../../components/Perf/model';
+import { CanvasRenderer } from '../render/CanvasRenderer';
+import type { MPElement } from '../render/MPElement';
 
 export class MicroPlotterEngine {
   public renderer: CanvasRenderer;
@@ -14,8 +14,7 @@ export class MicroPlotterEngine {
 
   public activateEditMode = (props: any) => {
     return this.renderer.mouseHandlers.activateEditMode(props);
-  }
-
+  };
 
   public add(element: MPElement) {
     element.setup(this);
@@ -31,17 +30,17 @@ export class MicroPlotterEngine {
     return this.renderer.getHTML();
   }
 
-  private updateScheduled: false | "quick" | "full" = false;
+  private updateScheduled: false | 'quick' | 'full' = false;
 
   public requestQuickUpdate() {
-    this.requestUpdate("quick");
+    this.requestUpdate('quick');
   }
 
-  public requestUpdate(type: "quick" | "full" = "full") {
+  public requestUpdate(type: 'quick' | 'full' = 'full') {
     if (this.updateScheduled) {
       // promote to full if requested
-      if (type === "full") {
-        this.updateScheduled = "full";
+      if (type === 'full') {
+        this.updateScheduled = 'full';
       }
       return;
     }

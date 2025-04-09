@@ -1,6 +1,6 @@
-import { Rect2D, V2 } from "@/Math";
-import { MPElement } from "../render/MPElement";
-import { CanvasRenderer } from "../render/CanvasRenderer";
+import { Rect2D, type V2 } from '@/Math';
+import type { CanvasRenderer } from '../render/CanvasRenderer';
+import { MPElement } from '../render/MPElement';
 
 export class MPPoint extends MPElement {
   public position: V2;
@@ -11,9 +11,9 @@ export class MPPoint extends MPElement {
   }
 
   render(renderer: CanvasRenderer): void {
-    const { rect, point, fill } = renderer.batch("orange");
+    const { rect, point, fill } = renderer.batch('orange');
     point(this.position);
     // stroke();
-    fill()
+    fill();
   }
 }

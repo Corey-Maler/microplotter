@@ -1,6 +1,6 @@
-import { V2 } from "@/Math";
-import { MicroPlotterEngine } from "../engine/engine";
-import { CanvasRenderer } from "./CanvasRenderer";
+import { V2 } from '@/Math';
+import type { MicroPlotterEngine } from '../engine/engine';
+import type { CanvasRenderer } from './CanvasRenderer';
 
 export interface Constraint {
   value: string;
@@ -8,7 +8,7 @@ export interface Constraint {
 }
 
 export abstract class MPElement {
-  public rotation: number = 0;
+  public rotation = 0;
   public origin: V2 = new V2(0, 0);
   protected _engine?: MicroPlotterEngine;
   protected _parent?: MPElement;
@@ -32,7 +32,7 @@ export abstract class MPElement {
     if (!this.children) {
       this.children = [];
     }
-    console.log("SETUP! child", this.engine);
+    console.log('SETUP! child', this.engine);
     this.children.push(child);
     child._parent = this;
   }
@@ -64,7 +64,6 @@ export abstract class MPElement {
       const newValue = constraint.fn();
       this[constraint.value] = newValue;
     });
-
   }
 
   public update(dt: number) {}
@@ -80,6 +79,6 @@ export abstract class MPElement {
   }
 
   render(renderer: CanvasRenderer) {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }

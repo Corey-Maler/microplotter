@@ -1,14 +1,14 @@
-import { V2 } from "@/Math";
-import { MPElement } from "../render/MPElement";
-import { CanvasRenderer } from "../render/CanvasRenderer";
-import { MPPoint } from "./MpPoint";
-import { MPLenght } from "./MpLength";
+import type { V2 } from '@/Math';
+import type { CanvasRenderer } from '../render/CanvasRenderer';
+import { MPElement } from '../render/MPElement';
+import { MPLenght } from './MpLength';
+import { MPPoint } from './MpPoint';
 
 export class MPLine extends MPElement {
   public p1: V2;
   public p2: V2;
 
-  public color: string = "#000000";
+  public color = '#000000';
 
   private lenghtElement?: MPLenght;
 
@@ -25,7 +25,7 @@ export class MPLine extends MPElement {
       this.lenghtElement = new MPLenght();
       const lt = this.lenghtElement;
       this.appendChild(lt);
-      lt.constrain("p1p2", () => [this.p1, this.p2]);
+      lt.constrain('p1p2', () => [this.p1, this.p2]);
     } else {
       if (this.lenghtElement) {
         this.removeChild(this.lenghtElement);
@@ -52,6 +52,6 @@ export class MPLine extends MPElement {
     const point = new MPPoint(this.middle);
     this.appendChild(point);
 
-    point.constrain("position", () => this.middle);
+    point.constrain('position', () => this.middle);
   }
 }

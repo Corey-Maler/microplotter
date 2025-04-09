@@ -1,12 +1,12 @@
-import { MicroPlotter, MicroPlotterEngine } from "@/MicroPlotter";
-import { Grid, GridMode } from "@/MicroPlotter/StandardElements/Grid";
-import { useCallback } from "react";
-import { DummyElement } from "./DummyElement";
+import { Rect2D, V2 } from '@/Math';
+import { MicroPlotter, type MicroPlotterEngine } from '@/MicroPlotter';
+import { Grid, GridMode } from '@/MicroPlotter/StandardElements/Grid';
+import { MPLine } from '@/MicroPlotter/StandardElements/MpLine';
+import { MPText } from '@/MicroPlotter/StandardElements/MpText';
+import { useCallback } from 'react';
+import { DummyElement } from './DummyElement';
 // import { MyNode } from "./MyNode";
-import { MyText } from "./MyText";
-import { Rect2D, V2 } from "@/Math";
-import { MPLine } from "@/MicroPlotter/StandardElements/MpLine";
-import { MPText } from "@/MicroPlotter/StandardElements/MpText";
+import { MyText } from './MyText';
 
 export const DraftingTable = () => {
   const onSetup = useCallback((engine: MicroPlotterEngine) => {
@@ -20,7 +20,7 @@ export const DraftingTable = () => {
 
     // engine.add(tempNode);
 
-    const text = new MPText("Hello world", new V2(0.5, 0.8))
+    const text = new MPText('Hello world', new V2(0.5, 0.8));
     engine.add(text);
 
     engine.add(new MyText(new V2(0.5, 0.5)));
@@ -34,7 +34,7 @@ export const DraftingTable = () => {
 
     tempNode = null;
     const cancelEditMode = engine.activateEditMode({
-      mode: "clicks",
+      mode: 'clicks',
       autorerender: true,
       onStart(point: V2) {
         tempNode = new MPLine(point, point, { showMiddlePoint: true });

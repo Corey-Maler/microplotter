@@ -1,5 +1,5 @@
-import { M3, Rect2D } from "@/Math";
-import { ColorCache } from "./ColorCache";
+import { M3, type Rect2D } from '@/Math';
+import { ColorCache } from './ColorCache';
 
 // Vertex shader that covers the full screen with a single quad
 const gridVertexShaderSource = `#version 300 es
@@ -103,7 +103,11 @@ void main() {
 }
 `;
 
-function createShader(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader | null {
+function createShader(
+  gl: WebGL2RenderingContext,
+  type: number,
+  source: string,
+): WebGLShader | null {
   const shader = gl.createShader(type);
   if (!shader) return null;
 
@@ -119,7 +123,11 @@ function createShader(gl: WebGL2RenderingContext, type: number, source: string):
   return null;
 }
 
-function createProgram(gl: WebGL2RenderingContext, vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram | null {
+function createProgram(
+  gl: WebGL2RenderingContext,
+  vertexShader: WebGLShader,
+  fragmentShader: WebGLShader,
+): WebGLProgram | null {
   const program = gl.createProgram();
   if (!program) return null;
 
@@ -141,7 +149,7 @@ export class GridShader {
   private program: WebGLProgram;
   private vao: WebGLVertexArrayObject;
   private positionBuffer: WebGLBuffer;
-  
+
   // Uniform locations
   private viewAreaLocation: WebGLUniformLocation;
   private gridColorLocation: WebGLUniformLocation;
@@ -149,65 +157,80 @@ export class GridShader {
   private gridSizeLocation: WebGLUniformLocation;
   private dotSizeLocation: WebGLUniformLocation;
   private resolutionLocation: WebGLUniformLocation;
-  
+
   private colorCache: ColorCache;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
     this.colorCache = ColorCache.getInstance();
-    
+
     // Create shaders
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, gridVertexShaderSource);
-    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, gridFragmentShaderSource);
-    
+    const vertexShader = createShader(
+      gl,
+      gl.VERTEX_SHADER,
+      gridVertexShaderSource,
+    );
+    const fragmentShader = createShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      gridFragmentShaderSource,
+    );
+
     if (!vertexShader || !fragmentShader) {
       throw new Error('Failed to create grid shaders');
     }
-    
+
     // Create and link program
     const program = createProgram(gl, vertexShader, fragmentShader);
     if (!program) {
       throw new Error('Failed to create grid shader program');
     }
-    
+
     this.program = program;
-    
+
     // Create a VAO and set up attributes
     const vao = gl.createVertexArray();
     if (!vao) {
       throw new Error('Failed to create VAO for grid shader');
     }
     this.vao = vao;
-    
+
     gl.bindVertexArray(vao);
-    
+
     // Create a position buffer for a full-screen quad
     const positionBuffer = gl.createBuffer();
     if (!positionBuffer) {
       throw new Error('Failed to create position buffer for grid shader');
     }
     this.positionBuffer = positionBuffer;
-    
+
     // Full-screen quad vertices (2 triangles)
     const positions = new Float32Array([
-      -1, -1, // bottom-left
-       1, -1, // bottom-right
-      -1,  1, // top-left
-       1,  1  // top-right
+      -1,
+      -1, // bottom-left
+      1,
+      -1, // bottom-right
+      -1,
+      1, // top-left
+      1,
+      1, // top-right
     ]);
-    
+
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    
+
     // Set up attribute
     const positionLocation = gl.getAttribLocation(program, 'a_position');
     gl.enableVertexAttribArray(positionLocation);
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-    
+
     // Get uniform locations
     this.viewAreaLocation = gl.getUniformLocation(program, 'u_viewArea')!;
     this.gridColorLocation = gl.getUniformLocation(program, 'u_gridColor')!;
-    this.subgridColorLocation = gl.getUniformLocation(program, 'u_subgridColor')!;
+    this.subgridColorLocation = gl.getUniformLocation(
+      program,
+      'u_subgridColor',
+    )!;
     this.gridSizeLocation = gl.getUniformLocation(program, 'u_gridSize')!;
     this.dotSizeLocation = gl.getUniformLocation(program, 'u_dotSize')!;
     this.resolutionLocation = gl.getUniformLocation(program, 'u_resolution')!;
@@ -216,65 +239,63 @@ export class GridShader {
   render(
     viewArea: Rect2D,
     gridSize: number,
-    density: number = 0,
-    gridColor: string = '#dddddd',
-    subgridColor: string = 'rgba(221, 221, 221, 0.5)',
-    dotSize: number = 2
+    density = 0,
+    gridColor = '#dddddd',
+    subgridColor = 'rgba(221, 221, 221, 0.5)',
+    dotSize = 2,
   ) {
     const gl = this.gl;
-    
+
     // Use the grid shader program
     gl.useProgram(this.program);
     gl.bindVertexArray(this.vao);
-    
+
     // Calculate the magnitude based on grid density
     const magnitudeOffset = density > 0 ? 1 : 0;
-    const magnitude = Math.floor(Math.log10(Math.min(viewArea.width, viewArea.height))) - magnitudeOffset;
+    const magnitude =
+      Math.floor(Math.log10(Math.min(viewArea.width, viewArea.height))) -
+      magnitudeOffset;
     const majorStep = Math.pow(10, magnitude);
-    
+
     // Set uniforms
     gl.uniform4f(
-      this.viewAreaLocation, 
-      viewArea.bottomLeft.x, 
-      viewArea.bottomLeft.y, 
-      viewArea.width, 
-      viewArea.height
+      this.viewAreaLocation,
+      viewArea.bottomLeft.x,
+      viewArea.bottomLeft.y,
+      viewArea.width,
+      viewArea.height,
     );
-    
+
     // Set colors
     const parsedGridColor = this.colorCache.getColor(gridColor);
     const parsedSubgridColor = this.colorCache.getColor(subgridColor);
-    
+
     gl.uniform4f(
       this.gridColorLocation,
       parsedGridColor[0],
       parsedGridColor[1],
       parsedGridColor[2],
-      parsedGridColor[3]
+      parsedGridColor[3],
     );
-    
+
     gl.uniform4f(
       this.subgridColorLocation,
       parsedSubgridColor[0],
       parsedSubgridColor[1],
       parsedSubgridColor[2],
-      parsedSubgridColor[3]
+      parsedSubgridColor[3],
     );
-    
+
     // Set grid size (based on adaptive grid calculations)
     gl.uniform1f(this.gridSizeLocation, majorStep);
-    
+
     // Set dot size
     gl.uniform1f(this.dotSizeLocation, dotSize);
-    
+
     // Set resolution
-    gl.uniform2f(
-      this.resolutionLocation,
-      gl.canvas.width,
-      gl.canvas.height
-    );
-    
+    gl.uniform2f(this.resolutionLocation, gl.canvas.width, gl.canvas.height);
+
     // Draw the quad as two triangles
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
-} 
+}
