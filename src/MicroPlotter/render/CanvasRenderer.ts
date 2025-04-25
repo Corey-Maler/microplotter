@@ -221,7 +221,7 @@ export class CanvasRenderer {
 
   private renderFPS(dt: number) {
     const { renderText } = this.batchScreenSpace('#333333');
-    renderText('FPS: ' + Math.round(1 / (dt / 1000)), new V2(10, 20));
+    renderText(`FPS: ${Math.round(1 / (dt / 1000))}`, new V2(10, 20));
   }
 
   public measureText(text: string) {
@@ -231,8 +231,8 @@ export class CanvasRenderer {
       measurements.actualBoundingBoxAscent +
       measurements.actualBoundingBoxDescent;
     return new V2(
-      measurements.width / this.viewPortTracker.width,
-      height / this.viewPortTracker.height,
+      measurements.width / this.viewPortTracker.width / this.panningTracker.zoom,
+      height / this.viewPortTracker.height / this.panningTracker.zoom,
     );
     // return this.panningTracker.screenToWorld(
     //   new V2(

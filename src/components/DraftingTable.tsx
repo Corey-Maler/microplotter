@@ -10,6 +10,7 @@ import { MyText } from './MyText';
 import { MPAttractor } from '@/MicroPlotter/StandardElements/MpAttractor';
 import { V2$ } from '@/MicroPlotter/cells/v2s';
 import { MpAngle } from '@/MicroPlotter/StandardElements/MpAngle';
+import { MpArcGuide } from '@/MicroPlotter/StandardElements/MpArcGuide';
 
 export const DraftingTable = () => {
   const onSetup = useCallback((engine: MicroPlotterEngine) => {
@@ -21,8 +22,22 @@ export const DraftingTable = () => {
 
     let tempNode: MPLine | null = null;
 
-    // engine.add(tempNode)
-    //;
+
+    const m1Point = new V2$(new V2(0.7, 0.4));
+    const m2Point = new V2$(new V2(0.8, 0.5));
+    const m3Point = new V2$(new V2(0.8, 0.4));
+
+    engine.addAttractor(new MPAttractor(m2Point, { color: 'gray' }));
+
+    engine.add(new MPLine(m1Point, m2Point));
+    engine.add(new MPLine(m1Point, m3Point));
+
+    engine.add(new MpAngle(m1Point, m2Point, m3Point, {
+      color: 'green',
+      mode: 'contraint',
+      radius: m1Point.distanceTo$(m2Point),
+      sizing: 'world',
+    }));
 
     const midPoint = new V2$(new V2(0.1, 0.4));
     const midPoint1 = new V2$(new V2(0.4, 0.9));
@@ -60,7 +75,7 @@ export const DraftingTable = () => {
 
     engine.add(new MyText(new V2(0.5, 0.5)));
 
-    const linePreview = new MPLine(new V2(0.4, 0.1), new V2(0.8, 0.4));
+    const linePreview = new MPLine(new V2(0.4, 0.1), new V2(0.8, 0.2));
     engine.add(linePreview);
 
     linePreview.tSelect();

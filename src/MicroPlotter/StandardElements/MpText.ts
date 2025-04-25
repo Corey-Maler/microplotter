@@ -33,24 +33,6 @@ export class MPText extends MPElement {
     return unwrap(this.position);
   }
 
-  /*
-  public set center(value: V2) {
-    const textSize = this.engine?.renderer.measureText(this.getText());
-
-    // this.origin = value;
-
-    if (textSize) {
-      this.position = value.sub(textSize.half);
-      // this.boundary.rect = new Rect2D(
-      //   this.position,
-      //   this.position.add(textSize),
-      // );
-    } else {
-      this.position = value;
-    }
-  }
-  */
-
   constructor(text: string | Cell<string>, p: V2 | V2$, options?: MPTextOptions) {
     super();
     this.position = p;
@@ -59,22 +41,16 @@ export class MPText extends MPElement {
     if (options) {
       this.align = options.align ?? this.align;
     }
-
-    // this.boundary = new MPRect(
-    //   this.position,
-    //   this.position.add(new V2(0.1, 0.1)),
-    // );
-    // this.appendChild(this.boundary);
   }
 
   render(renderer: CanvasRenderer): void {
-    const { renderText } = renderer.batch(this.color);
+    const { renderText, rect, stroke } = renderer.batch(this.color);
     const text = this.getText();
     let pos =
       this.position instanceof V2$ ? this.position.value : this.position;
 
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    const box = this.engine!.renderer.measureText(text);
+    const box = renderer.measureText(text);
 
     switch (this.align) {
       case "left":
@@ -88,6 +64,6 @@ export class MPText extends MPElement {
     }
 
     renderText(text, pos, 18);
-    // stroke();
+    stroke();
   }
 }

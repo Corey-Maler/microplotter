@@ -1,5 +1,5 @@
 import { V2 } from '@/Math/V2';
-import { Cell } from '../cells/cell';
+import { Cell, unwrap } from '../cells/cell';
 import { V2$ } from '../cells/v2s';
 import type { CanvasRenderer } from '../render/CanvasRenderer';
 import { MPElement } from '../render/MPElement';
@@ -19,16 +19,16 @@ import './unitExperimental';
 
 export interface AngleOptions {
   color: string;
-  radius: number;
+  radius: number | Cell<number>;
   sizing: 'px' | 'world';
-  mode: 'measurement' | 'contraint'
+  mode: 'measurement' | 'contraint';
 }
 
 const DEFAULT_ANGLE_OPTIONS: AngleOptions = {
   color: 'violet',
   radius: 50,
   sizing: 'px',
-  mode: 'measurement'
+  mode: 'measurement',
 };
 
 export class MpAngle extends MPElement {
@@ -37,7 +37,6 @@ export class MpAngle extends MPElement {
   public towards: V2$;
 
   public angle$: Cell<number> = new Cell(0);
-
   public startAngle$: Cell<number> = new Cell(0);
   public endAngle$: Cell<number> = new Cell(0);
   public middleAngle$: Cell<number> = new Cell(0);
@@ -49,13 +48,13 @@ export class MpAngle extends MPElement {
 
   public textOffset$: V2$ = new V2$(new V2(0, 0));
 
-  // public radius = 50;
-
   public options: AngleOptions;
   public get radius(): number {
     return this.options.sizing === 'world'
-      ? this.options.radius
-      : this.engine?.renderer.measureScreenInWorld(this.options.radius) ?? 0;
+      ? unwrap(this.options.radius)
+      : this.engine?.renderer.measureScreenInWorld(
+          unwrap(this.options.radius)
+        ) ?? 0;
   }
 
   compute(renderer: CanvasRenderer): void {
@@ -122,7 +121,12 @@ export class MpAngle extends MPElement {
     this.endPoint$.value = endPoint;
   }
 
-  constructor(cross: V2$, base: V2$, towards: V2$, options: Partial<AngleOptions> = {}) {
+  constructor(
+    cross: V2$,
+    base: V2$,
+    towards: V2$,
+    options: Partial<AngleOptions> = {}
+  ) {
     super();
     this.cross = cross;
     this.base = base;
@@ -131,66 +135,7 @@ export class MpAngle extends MPElement {
     this.options = {
       ...DEFAULT_ANGLE_OPTIONS,
       ...options,
-    }
-
-    // this.angle$ = V2$.combine(this.cross, this.base, this.towards).derive(
-    //   ([cross, base, towards]) => {
-    //     return V2.angleBetweenPoints(base, cross, towards);
-    //   }
-    // );
-
-    // this.anticlockwise$ = V2$.combine(
-    //   this.cross,
-    //   this.base,
-    //   this.towards
-    // ).derive(([cross, base, towards]) => {
-    //   const a = base;
-    //   const b = cross;
-    //   const c = towards;
-
-    //   const ba = b.sub(a);
-    //   const bc = b.sub(c);
-    //   const cross1 = ba.x * bc.y - ba.y * bc.x;
-    //   return cross1 > 0;
-    // });
-
-    // this.startAngle$ = V2$.combine(this.base, this.cross).derive(
-    //   ([base, cross]) => {
-    //     const b = cross;
-    //     const a = base;
-    //     const ba = b.sub(a);
-    //     return -ba.angle + Math.PI;
-    //   }
-    // );
-
-    // this.endAngle$ = Cell.combine(
-    //   this.startAngle$,
-    //   this.angle$,
-    //   this.anticlockwise$
-    // ).derive(([startAngle, angle, anticlockwise]) => {
-    //   return startAngle + angle * (anticlockwise ? -1 : 1);
-    // });
-
-    // const middleAngle$ = Cell.combine(this.startAngle$, this.endAngle$).derive(
-    //   ([s, e]) => (Math.abs(s - e) < Angles.d30 ? -Angles.d30 : 0) + (s + e) / 2
-    // );
-
-    // const textOffset$ = Cell.combine(this.cross, middleAngle$).derive(
-    //   ([cross, middleAngle]) => {
-    //     // const pp1 = new V2(rrx, 0).setAngle(-middleAngle);
-    //     const pp1 = new V2(0.1, 0).setAngle(-middleAngle);
-
-    //     const pp = cross.add(pp1);
-    //     return pp;
-    //   }
-    // );
-    // this.textOffset$ = V2$.fromCell(textOffset$);
-
-    // const textChild = new MPText(
-    //   this.angle$.derive(Angles.prettyPrint),
-    //   V2$.fromCell(textOffset$)
-    // );
-    // this.appendChild(textChild);
+    };
   }
 
   compose() {
@@ -208,57 +153,48 @@ export class MpAngle extends MPElement {
         sizing: 'px',
         size: 10,
       }),
-
-      // new MPDebugVector(this.startPoint$, this.startPerpendicularPoint$),
     ];
   }
 
   render(renderer: CanvasRenderer): void {
     const rr = this.radius;
-    const rrx = renderer.measureScreenInWorld(rr + 20);
-    const { renderText, arc, stroke, renew } = renderer.batch('violet');
+    const { arc, stroke, renew, pss, magicArc } = renderer.batch(this.options.color, 1);
 
-    const an = this.angle$.value;
-
-    const a = this.base.value;
-    const b = this.cross.value;
-    const c = this.towards.value;
-
-    const ba = b.sub(a);
-    const bc = b.sub(c);
-
-    // const startAngle = -ba.angle + Math.PI;
     const startAngle = this.startAngle$.value;
-
-    // const cross = ba.x * bc.y - ba.y * bc.x;
-    // const anticlockwise = cross > 0;
     const anticlockwise = this.anticlockwise$.value;
-
-    // const endAngle = startAngle + (anticlockwise ? -an : an); //bc.angle - Math.PI;
     const endAngle = this.endAngle$.value;
 
     const startOffset =
       Math.abs(startAngle - endAngle) < Angles.d30 ? Angles.d30 : 0;
 
-    // const middleAngle = (startAngle + endAngle) / 2;
-
-    // const pp1 = new V2(rrx, 0).setAngle(-middleAngle);
-
-    // const pp = b.add(pp1);
-
-    // const angl = (an / Math.PI) * 180;
-
-    // renderText(`${angl.toFixed(2)}°`, pp);
-
-    renew();
-
-    arc(
-      this.cross.value,
-      rr,
-      startAngle - startOffset * (anticlockwise ? 0 : 1),
-      endAngle - startOffset * (anticlockwise ? 1 : 0),
-      anticlockwise
-    );
-    stroke();
+    if (this.options.mode === 'contraint') {
+      magicArc(
+        this.cross.value,
+        rr,
+        startAngle + Math.PI,
+        endAngle + Math.PI,
+        anticlockwise
+      )
+      renew(this.options.color, 4, {
+        dashPattern: [],
+      });
+      arc(
+        this.cross.value,
+        rr,
+        startAngle,
+        endAngle,
+        anticlockwise
+      );
+      stroke();
+    } else {
+      arc(
+        this.cross.value,
+        rr,
+        startAngle - startOffset * (anticlockwise ? 0 : 1),
+        endAngle - startOffset * (anticlockwise ? 1 : 0),
+        anticlockwise
+      );
+      stroke();
+    }
   }
 }

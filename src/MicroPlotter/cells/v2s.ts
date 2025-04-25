@@ -25,6 +25,10 @@ export class V2$ extends Cell<V2> {
     return V2$.combine(this, other).derive(([v1, v2]) => v1.angleTo(v2));
   }
 
+  distanceTo$(other: V2$) {
+    return V2$.combine(this, other).derive(([v1, v2]) => v1.distanceTo(v2));
+  }
+
   scale$(factor: number): V2$ {
     return this.deriveV2$((val) => val.scale(factor));
   }
