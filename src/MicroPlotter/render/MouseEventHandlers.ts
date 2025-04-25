@@ -1,10 +1,10 @@
-import { V2 } from '@/Math';
-import { Observable } from '@/utils/observable';
-import type { PanningTracker } from './PanningTracker';
-import type { ViewPort } from './ViewPort';
+import { V2 } from "@/Math";
+import { Observable } from "@/utils/observable";
+import type { PanningTracker } from "./PanningTracker";
+import type { ViewPort } from "./ViewPort";
 
 export class MouseEventHandlers {
-  private mouseMode: 'trackpad' | 'mouse' = 'trackpad';
+  private mouseMode: "trackpad" | "mouse" = "trackpad";
   public mousePosition: V2 = new V2(0, 0);
   public $mousePositionScreen: Observable<V2> = new Observable();
   public $mousePositionWorld: Observable<V2> = new Observable();
@@ -14,10 +14,12 @@ export class MouseEventHandlers {
   private dragging = false; // todo: rename to "panning" or something
 
   private editMode = false;
+  private dragMode = false;
 
   // maybe switch to RXJS?
   private mouseDraggingFrom: V2 | null = null;
   private $mouseDraggingFromScreen: Observable<V2> = new Observable();
+  private $mouseDraggingFromWorld: Observable<V2> = new Observable();
   private $mouseUpScreen: Observable<V2> = new Observable();
 
   constructor(
@@ -35,24 +37,82 @@ export class MouseEventHandlers {
     this.$clicksScreen.subscribe((point) =>
       this.$clicksWorld.next(panningTracker.screenToWorld(point)),
     );
+
+    this.$mouseDraggingFromScreen.subscribe((point) => {
+      this.$mouseDraggingFromWorld.next(panningTracker.screenToWorld(point));
+    });
   }
 
   private setupEventListeners() {
-    this.canvas.addEventListener('mousedown', this.onMouseDown);
-    this.canvas.addEventListener('mousemove', this.onMouseMove);
-    this.canvas.addEventListener('mouseup', this.onMouseUp);
-    this.canvas.addEventListener('wheel', this.onMouseScroll, {
+    this.canvas.addEventListener("mousedown", this.onMouseDown);
+    this.canvas.addEventListener("mousemove", this.onMouseMove);
+    this.canvas.addEventListener("mouseup", this.onMouseUp);
+    this.canvas.addEventListener("wheel", this.onMouseScroll, {
       passive: false,
     });
-    this.canvas.addEventListener('click', this.onClick);
+    this.canvas.addEventListener("click", this.onClick);
   }
+
+  public activateItemDragMode = (props: {
+    onHover: (point: V2) => void;
+    onMove: (point: V2) => void;
+    onDragStart: (point: V2) => void;
+    onDragEnd?: (point: V2) => void;
+  }) => {
+    this.dragging = false;
+    this.dragMode = true;
+
+    const subs = new Set<() => void>();
+
+    const setup = () => {
+      const onHoverUnsubscibe = this.$mousePositionWorld.subscribe(
+        props.onHover,
+      );
+
+      subs.add(onHoverUnsubscibe);
+
+      const startDraggingUnsubscribe = this.$mouseDraggingFromWorld.subscribe(
+        (p) => {
+          onHoverUnsubscibe();
+          startDraggingUnsubscribe();
+          subs.delete(onHoverUnsubscibe);
+          subs.delete(startDraggingUnsubscribe);
+          props.onDragStart(p);
+          const onMoveUnsubscribe = this.$mousePositionWorld.subscribe(
+            props.onMove,
+          );
+          const mouseUpUnsubscribe = this.$mouseUpScreen.subscribe((p2) => {
+            onMoveUnsubscribe();
+            mouseUpUnsubscribe();
+            subs.delete(onMoveUnsubscribe);
+            subs.delete(mouseUpUnsubscribe);
+            props.onDragEnd?.(p2);
+            setup();
+          });
+
+          subs.add(onMoveUnsubscribe);
+          subs.add(mouseUpUnsubscribe);
+        },
+      );
+      subs.add(startDraggingUnsubscribe);
+    };
+
+    setup();
+
+    return function cancelItemDragMode() {
+      for (const sub of subs) {
+        sub();
+      }
+      subs.clear();
+    }
+  };
 
   public activateEditMode = (props: {
     onClick?: (point: V2) => void;
     onMove?: (point: V2) => void;
     onEnd: (point: V2) => void;
     onStart: (point: V2) => void;
-    mode: 'auto' | 'clicks' | 'drag&drop';
+    mode: "auto" | "clicks" | "drag&drop";
     autorerender?: boolean;
   }) => {
     this.dragging = false; // not sure, but probably should be this
@@ -85,7 +145,7 @@ export class MouseEventHandlers {
 
     subscriptions.push(unsubscribeFromClicks);
 
-    if (mode === 'drag&drop' || mode === 'auto') {
+    if (mode === "drag&drop" || mode === "auto") {
       const unsubscribeDragging = this.$mouseDraggingFromScreen.subscribe(
         (point) => {
           unsubscribeFromClicks();
@@ -125,7 +185,7 @@ export class MouseEventHandlers {
   onMouseDown = (event: MouseEvent) => {
     this.mouseDraggingFrom = this.event2V(event);
     // Handle mouse down event
-    if (!this.editMode) {
+    if (!this.editMode && !this.dragMode) {
       // Handle edit mode specific logic
       this.dragging = true;
     }
@@ -139,7 +199,7 @@ export class MouseEventHandlers {
     const { movementX, movementY } = event;
 
     if (this.mouseDraggingFrom?.withinDistance(v2, 10)) {
-      console.log('dragging mode, not clicks mode');
+      console.log("dragging mode, not clicks mode");
       this.$mouseDraggingFromScreen.next(v2);
     }
 
@@ -200,7 +260,7 @@ export class MouseEventHandlers {
   private onMouseScroll = (e: WheelEvent) => {
     e.preventDefault();
 
-    if (this.mouseMode === 'trackpad') {
+    if (this.mouseMode === "trackpad") {
       const ratio = this.viewPortTracker.HDPI;
 
       const { deltaX, deltaY } = e;

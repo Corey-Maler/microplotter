@@ -95,6 +95,14 @@ export class V2 {
     return this.x === p2.x && this.y === p2.y;
   }
 
+  public normalize() {
+    const length = this.length();
+    if (length === 0) {
+      return new V2(0, 0);
+    }
+    return new V2(this.x / length, this.y / length);
+  }
+
   public closeEnough(p2: V2, epsilon = 1e-20) {
     return (
       Math.abs(this.x - p2.x) < epsilon && Math.abs(this.y - p2.y) < epsilon
@@ -146,4 +154,23 @@ export class V2 {
   static fromJson(json: any) {
     return new V2(json.x, json.y);
   }
+
+  /**
+  *   a
+  *    \
+  *     \
+  *      b ----- c
+  * @param a
+  * @param b
+  * @param c
+  * @returns
+  */
+  static angleBetweenPoints(a: V2, b: V2, c: V2) {
+      const ab = new V2(a.x - b.x, a.y - b.y);
+      const cb = new V2(c.x - b.x, c.y - b.y);
+      const dot = ab.x * cb.x + ab.y * cb.y;
+      const magAB = Math.hypot(ab.x, ab.y);
+      const magCB = Math.hypot(cb.x, cb.y);
+      return Math.acos(dot / (magAB * magCB));
+    }
 }

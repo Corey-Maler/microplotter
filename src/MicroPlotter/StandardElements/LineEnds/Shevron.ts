@@ -7,11 +7,13 @@ import { MPElement } from "@/MicroPlotter/render/MPElement";
 export interface LineEndProps {
   size: number;
   color: string;
+  sizing?: "px" | "world";
 }
 
 const DEFAULT_LINE_END_PROPS: LineEndProps = {
   size: 0.007,
   color: "red",
+  sizing: 'world'
 };
 
 export class LineEnd extends MPElement {
@@ -43,8 +45,10 @@ export class Shevron extends LineEnd {
 
     const angle = p1.angleTo(p2);
 
-    const l1 = new V2(this.options.size, 0).setAngle(angle + Angles.d30);
-    const l2 = new V2(this.options.size, 0).setAngle(angle - Angles.d30);
+    const size = this.options.sizing === 'world' ? this.options.size : renderer.measureScreenInWorld(this.options.size);
+
+    const l1 = new V2(size, 0).setAngle(angle + Angles.d30);
+    const l2 = new V2(size, 0).setAngle(angle - Angles.d30);
 
     line(p1, p1.sub(l1));
     line(p1, p1.sub(l2));

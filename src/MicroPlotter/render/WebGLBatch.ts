@@ -1,5 +1,4 @@
 import { M3, type Rect2D, type V2 } from '@/Math';
-import type { LL } from './Batch';
 import { ColorCache } from './ColorCache';
 import { GridShader } from './GridShader';
 
@@ -83,7 +82,7 @@ function createProgram(
   return null;
 }
 
-export class WebGLBatchLL implements LL {
+export class WebGLBatchLL {
   private gl: WebGL2RenderingContext;
   private program: WebGLProgram;
   private vao: WebGLVertexArrayObject;

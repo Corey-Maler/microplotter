@@ -2,8 +2,12 @@ import { V2 } from "@/Math";
 import { Cell } from "./cell";
 
 export class V2$ extends Cell<V2> {
-  constructor(value?: V2) {
-    super(value ?? new V2(0, 0));
+  /**
+   * temporary attachment for attractor
+   */
+  public __attractor?: any;
+  constructor(value?: V2, dep = false) {
+    super(value ?? new V2(0, 0), dep);
   }
 
   update(value: V2) {
@@ -18,7 +22,7 @@ export class V2$ extends Cell<V2> {
   }
 
   angleTo$(other: V2$) {
-    return V2$.combine(this, other).derive(([v1, v2]) => v1.angleTo(v2))
+    return V2$.combine(this, other).derive(([v1, v2]) => v1.angleTo(v2));
   }
 
   scale$(factor: number): V2$ {
@@ -26,7 +30,7 @@ export class V2$ extends Cell<V2> {
   }
 
   public deriveV2$(fn: (val: V2) => V2): V2$ {
-    const c = new V2$(fn(this.value));
+    const c = new V2$(fn(this.value), true);
     this.subscribe((newValue) => {
       c.value = fn(newValue);
     });
@@ -46,7 +50,7 @@ export class V2$ extends Cell<V2> {
   }
 
   static fromCell(cell: Cell<V2>) {
-    const c = new V2$(cell.value);
+    const c = new V2$(cell.value, true);
     cell.subscribe((newValue) => {
       c.value = newValue;
     });

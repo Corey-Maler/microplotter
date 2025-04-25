@@ -7,8 +7,8 @@ import { V2$ } from '../cells/v2s';
 import { type LineEnd, Shevron } from './LineEnds/Shevron';
 
 export class MPLine extends MPElement {
-  private _p1 = new V2$();
-  private _p2 = new V2$();
+  public _p1 = new V2$();
+  public _p2 = new V2$();
 
   // public p1: V2 | V2$;
   // public p2: V2 | V2$;
@@ -84,5 +84,16 @@ export class MPLine extends MPElement {
     this.appendChild(point);
 
     // point.constrain('position', () => this.middle);
+  }
+
+  private setupAttractors() {
+    this.engine?.addAttractorFor(this._p1);
+    this.engine?.addAttractorFor(this._p2);
+    this.engine?.addAttractorFor(this.middle$);
+  }
+
+  public tSelect() {
+    //
+    this.setupAttractors();
   }
 }

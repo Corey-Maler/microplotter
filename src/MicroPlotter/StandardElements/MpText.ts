@@ -51,10 +51,14 @@ export class MPText extends MPElement {
   }
   */
 
-  constructor(text: string | Cell<string>, p: V2 | V2$) {
+  constructor(text: string | Cell<string>, p: V2 | V2$, options?: MPTextOptions) {
     super();
     this.position = p;
     this.text = text;
+
+    if (options) {
+      this.align = options.align ?? this.align;
+    }
 
     // this.boundary = new MPRect(
     //   this.position,

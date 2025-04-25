@@ -10,7 +10,28 @@ export interface Constraint {
 }
 
 export abstract class MPElement {
+  public abstract testHover: ((p: V2, within: number) => boolean) | undefined;
+  public abstract onHover?: () => void;
+  public abstract onBlur?: () => void;
+
   public rotation: number | Cell<number> = 0;
+
+  protected hovered = false;
+  public updateHover(point: V2, radius: number) {
+    if (this.testHover) {
+      const nowHovered = this.testHover(point, radius);
+      if (this.hovered !== nowHovered) {
+        this.engine?.requestQuickUpdate()
+      }
+      if (nowHovered && !this.hovered && this.onHover) {
+        this.onHover()
+      }
+      if (!nowHovered && this.hovered && this.onBlur) {
+        this.onBlur()
+      }
+      this.hovered = nowHovered;
+    }
+  }
 
   // Origin by default should not be set from the outside of a component
   protected _origin: V2 = new V2(0, 0);
@@ -28,6 +49,26 @@ export abstract class MPElement {
 
   setup(engine: MicroPlotterEngine) {
     this._engine = engine;
+
+    this.tryCompose();
+
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    this.children?.forEach((child) => {
+      child.setup(engine);
+    });
+  }
+
+  private tryCompose() {
+    if (this.compose) {
+      const children = this.compose();
+      if (children) {
+        if (this.children) {
+          this.children.push(...children);
+        } else {
+          this.children = children;
+        }
+      }
+    }
   }
 
   public constraints: Constraint[] = [];
@@ -54,13 +95,18 @@ export abstract class MPElement {
     }
   }
 
-  public doUpdate(dt: number) {
+  public doUpdate(dt: number, renderer: CanvasRenderer) {
     // constraints for now goes from up to down, but
     // updates goes from down to up
+
+    if (this.compute) {
+      this.compute(renderer);
+    }
+
     this.recalculateConstraints();
     if (this.children) {
       for (const child of this.children) {
-        child.doUpdate(dt);
+        child.doUpdate(dt, renderer);
       }
     }
     this.update(dt);

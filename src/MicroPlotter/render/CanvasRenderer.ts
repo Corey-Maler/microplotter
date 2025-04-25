@@ -8,6 +8,7 @@ import { ViewPort } from './ViewPort';
 import { WebGLBatchLL } from './WebGLBatch';
 import { Colors } from './colors';
 import { unwrap } from '../cells/cell';
+import type { Color } from '../Color/Colors';
 
 export class CanvasRenderer {
   protected rootDiv = document.createElement('div');
@@ -67,6 +68,17 @@ export class CanvasRenderer {
 
   public worldToScreen(p: V2) {
     return this.viewMatrix.multiplyV2(p);
+  }
+
+  /**
+  * Returns equal distance in world space for giving screen space
+  * @param x in pixels screen space
+  * @returns
+  */
+  public measureScreenInWorld(x: number) {
+    const zero = this.screenToWorld(new V2(0, 0));
+    const p = this.screenToWorld(new V2(x, 0));
+    return p.x - zero.x;
   }
 
   public screenToWorld(p: V2) {
@@ -148,8 +160,8 @@ export class CanvasRenderer {
     const ctx = canvas.getContext('2d')!;
     this.ctx = ctx;
 
-    this.ll = new LLSoftware(this.viewMatrix, ctx);
-    this.llScreenSpace = new LLSoftware(M3.identity(), ctx);
+    this.ll = new Batch(this.viewMatrix, ctx);
+    this.llScreenSpace = new Batch(M3.identity(), ctx);
 
     this._webGlLL = new WebGLBatchLL(webGlCanvas);
 
@@ -163,16 +175,16 @@ export class CanvasRenderer {
     this.canvas.width = x * ratio;
     this.canvas.height = y * ratio;
 
-    this.canvas.style.width = x + 'px';
-    this.canvas.style.height = y + 'px';
+    this.canvas.style.width = `${x}px`;
+    this.canvas.style.height = `${y}px`;
 
     this.webGlCanvas.width = x * ratio;
     this.webGlCanvas.height = y * ratio;
 
     this._webGlLL?.resize(x * ratio, y * ratio);
 
-    this.webGlCanvas.style.width = x + 'px';
-    this.webGlCanvas.style.height = y + 'px';
+    this.webGlCanvas.style.width = `${x}px`;
+    this.webGlCanvas.style.height = `${y}px`;
 
     this.panningTracker.updateWorldSpaceMatrix();
     this.panningTracker.recalculate();
@@ -250,18 +262,15 @@ export class CanvasRenderer {
     }
   }
 
-  public batch(initialColor: string, lineWidth = 1) {
-    return new Batch(this.ll, initialColor, lineWidth);
+  public batch(initialColor: string | Color, lineWidth = 1) {
+    // return new Batch(this.ll, initialColor, lineWidth);
+    this.ll.renew(initialColor, lineWidth);
+    return this.ll;
   }
 
   public batchScreenSpace(initialColor: string, lineWidth = 1) {
-    return new Batch(this.llScreenSpace, initialColor, lineWidth);
-  }
-
-  public webGlBatch(color?: string) {
-    if (!this._webGlLL) {
-      throw new Error('Webgl LL is not yet setup');
-    }
-    return new Batch(this._webGlLL, color || 'black', 1);
+    // return new Batch(this.llScreenSpace, initialColor, lineWidth);
+    this.llScreenSpace.renew(initialColor, lineWidth);
+    return this.llScreenSpace;
   }
 }

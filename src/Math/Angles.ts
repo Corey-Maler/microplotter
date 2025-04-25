@@ -8,4 +8,5 @@ export const Angles = {
   d90: Math.PI / 2,
   d120: Math.PI * 2 / 3,
   d180: Math.PI,
+  prettyPrint: (radians: number) => `${Angles.toDegrees(radians).toFixed(2)}°`
 }
